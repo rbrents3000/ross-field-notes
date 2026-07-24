@@ -12,9 +12,7 @@ EMF / DML, and the integrations around it.
 One question per file:
 
 ```
-q-026-blanket-sales-orders.md         Is there a blanket sales order in Ross, or do I fake it?
-q-027-which-ross-service-pack.md      How do I tell which Ross 8.0 service pack I'm actually running?
-q-028-blanket-po-inquiry-bad-data.md  My blanket PO inquiry shows the wrong quantities on releases. Bug?
+q-001-future-cost-rollup.md  My future cost rollup errors out — "product not found in Process Costing Spec." What did I miss?
 ```
 
 Each `q-###-<slug>.md` is Markdown with a small frontmatter header — the number keeps them ordered,
@@ -31,12 +29,12 @@ Every note opens with frontmatter:
 | `title` | the question, as a headline |
 | `tag` | ROSS · EMF · DML · IAF · CRYSTAL · APTEAN |
 | `audience` | `developer` or `user` |
-| `source` | `form` or `group` — where the question came from |
 | `date` | YYYY-MM-DD |
 | `system` | e.g. "Ross ERP 8.0" |
 | `reading_time` | e.g. "6 min" |
 | `excerpt` | one-line summary |
 | `question` | the asker's own words |
+| `restated` | a clean, neutral restatement of the question |
 | `fix` | the TL;DR answer |
 | `margin_notes` | short gutter notes (optional) |
 
@@ -55,8 +53,8 @@ lands here.
 
 ## Have a question?
 
-Good ones become entries. Send it through the form on the site, or ask the Ross practitioners'
-community. Answers show up here.
+Good ones become entries. Send it through the site, or ask the Ross practitioners' community.
+Answers show up here.
 
 ## License
 
