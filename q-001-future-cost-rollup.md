@@ -15,17 +15,17 @@ margin_notes:
   - "02 first, then 20 ↴"
   - "future mode only READS the qty tables →"
   - "let Make items derive, don't hand-key"
+reviewed: "2026-07-24"
+verified: "Verified against Ross 8.0 source"
+applies_when:
+  - "The audit report errors with `P_01405` — 'Product … not found in Process Costing Spec' — as an error, not a warning."
+  - "One or more Make components roll up to zero and raise `P_25095` — 'Price is zero for:'."
+  - "A standard cost rollup behaves; only the future rollup misbehaves."
 ---
 
 Your read of it is right, and it turns out to be the key to both problems. A future rollup isn't a from-scratch rollup — it leans on a snapshot that a *different* pass is supposed to build first. Skip that pass and the future rollup has nothing to stand on.
 
-## Does this match what you're seeing?
-
-- The audit report throws `P_01405` — *"Product … not found in Process Costing Spec"* — as an **error**, not a warning.
-- One or more **make** components roll up to zero and raise `P_25095`, *"Price is zero for:"*.
-- A standard cost rollup behaves; only the **future** rollup misbehaves.
-
-If that's the picture, nothing is wrong with your data or your future prices. It's the *order* the rollups ran in.
+If the checklist above matches, nothing is wrong with your data or your future prices — it's the *order* the rollups ran in.
 
 ## Two rollups, two different jobs
 

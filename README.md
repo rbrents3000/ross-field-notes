@@ -37,6 +37,10 @@ Every note opens with frontmatter:
 | `restated` | a clean, neutral restatement of the question |
 | `fix` | the TL;DR answer |
 | `margin_notes` | short gutter notes (optional) |
+| `applies_when` | a "you're likely seeing this if…" self-check (optional) |
+| `sp_note` | a service-pack nuance shown on the version stamp (optional) |
+| `reviewed` / `verified` | last-reviewed date + a "verified against source" tag (optional) |
+| `related` | slugs of topically related notes → "See also" (optional) |
 
 Body conventions:
 
