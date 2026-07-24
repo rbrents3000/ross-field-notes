@@ -40,10 +40,17 @@ Every note opens with frontmatter:
 
 Body conventions:
 
-- A blockquote beginning `> **field note** —` renders as a set-aside callout.
-- Fenced code blocks tagged `dml` render as a "printout" with line numbers. Optional first lines
-  act as directives: `@program`, `@note`, `@reads`, `@writes`, `@risk`, and
-  `@highlight <lines>`. Lines beginning with `!` are comments.
+- **Callouts** — a blockquote whose first line is a bold label renders as a set-aside, the label
+  choosing the accent: `> **field note** —` / `> **rule of thumb** —` (an aside), `> **caution** —`
+  (a gotcha), `> **in plain terms** —` (a plain-language gloss), `> **in the system** —` (the
+  developer detail behind a plain read).
+- **Checklists** — task lists (`- [ ] …`, `- [x] …`) render as tick-boxes — handy for setup
+  prerequisites.
+- **Procedures** — a fenced ` ```steps ` block renders as a numbered timeline. A step header is
+  `<n> | <title>` (number optional); optional `where:` / `do:` / `sys:` / `note:` lines follow.
+- **DML printouts** — fenced code blocks tagged `dml` render with line numbers. Optional first lines
+  act as directives: `@program`, `@note`, `@reads`, `@writes`, `@risk`, and `@highlight <lines>`.
+  Lines beginning with `!` are comments.
 
 ## Scope
 
