@@ -41,6 +41,7 @@ Every note opens with frontmatter:
 | `sp_note` | a service-pack nuance shown on the version stamp (optional) |
 | `reviewed` / `verified` | last-reviewed date + a "verified against source" tag (optional) |
 | `related` | slugs of topically related notes → "See also" (optional) |
+| `key_refs` | key tables / programs → chip strip at the top of the answer (optional) |
 
 Body conventions:
 
@@ -52,6 +53,10 @@ Body conventions:
   prerequisites.
 - **Procedures** — a fenced ` ```steps ` block renders as a numbered timeline. A step header is
   `<n> | <title>` (number optional); optional `where:` / `do:` / `sys:` / `note:` lines follow.
+- **Rich blocks** — ` ```cards ` (typed enumerations, `glyph | name | description`), ` ```states `
+  (a lifecycle strip, `name | sub`), ` ```checklist ` (`[ ] title {tag} — detail` + a `where:` line),
+  and ` ```legend ` (`tag | meaning`). The `{tag}`s are colour-coded by meaning. A `## 01 · Title`
+  heading renders the number as a section kicker.
 - **DML printouts** — fenced code blocks tagged `dml` render with line numbers. Optional first lines
   act as directives: `@program`, `@note`, `@reads`, `@writes`, `@risk`, and `@highlight <lines>`.
   Lines beginning with `!` are comments.
