@@ -14,8 +14,8 @@ fix: "No 'blanket sales order' exists. The quantity-and-price commitment lives i
 reviewed: "2026-07-24"
 verified: "Verified against Ross 8.0 source"
 key_refs:
-  - "SALES_CONTRACT_PRICES"
   - "SOP_PRICES"
+  - "sys_m_prices"
   - "sop_l_get_prices"
 related:
   - "q-002-blanket-purchase-orders"
@@ -37,18 +37,43 @@ Purchasing gets the clean version of this: a blanket PO is a real document — a
 
 **Sales Contract Pricing** is the mechanism that behaves like a blanket PO: a customer agrees to a **quantity at a fixed price over a date window**, and normal sales orders draw it down until it's exhausted or expires. It's a *pricing agreement* applied to ordinary orders — not a separate order document.
 
-Turn it on with `AR_CONTROLS(CONTRACT_PRICES_IN_USE) = Y` per division (in `sop_m_controls`); optionally `CONTRACT_PRICES_OVERRIDE` to let operators edit a contract-derived price. Contracts are defined in `SYS_M_SALES_CONTRACT_PRICES`.
+Turn it on with `AR_CONTROLS(CONTRACT_PRICES_IN_USE) = Y` per division (in `sop_m_controls`); optionally `CONTRACT_PRICES_OVERRIDE` to let operators edit a contract-derived price. In current 8.0 you maintain the contracts in **Price Maintenance** (`sys_m_prices`) under the *Contract* price type — the old standalone `SYS_M_SALES_CONTRACT_PRICES` program is retired — and the contract itself lives on `SOP_PRICES`.
 
 | Table | Role | Commitment fields — the blanket bit |
 | --- | --- | --- |
-| `SALES_CONTRACT_PRICES` / `_LINES` | Definition — what you set up | `CONTRACT_QTY`, `CONTRACT_QTY_ORD_TD`, `CONTRACT_QTY_OUTSTANDING`, `VALID_FROM/TO_DATE`, status O/C |
-| `SOP_PRICES` / `_LINES` | Runtime — what the engine reads | Same fields; contract rows carry `PRICE_TYPE = "1"` |
+| `SOP_PRICES` / `_LINES` | Where the contract lives — set in Price Maintenance, read by the pricing engine | `CONTRACT_QTY`, `CONTRACT_QTY_ORD_TD`, `CONTRACT_QTY_OUTSTANDING`, `VALID_FROM/TO_DATE`, status O/C; contract rows carry `PRICE_TYPE = "1"` |
+| `SALES_CONTRACT_PRICES` / `_LINES` | Legacy predecessor tables (the pre-8.0 screen); still in the schema, no longer user-maintained | same field shape |
+
+Here's one such contract in Price Maintenance — the customer, the product, the validity window, the committed quantity, and the running draw-down all on a single record:
+
+```screen
+title: Sales Prices
+program: SYS_M_PRICES
+context: Company = 01 | Price Type = Contract
+form:
+  Customer Number {lov} = CUST-4021
+  Product {lov} = FG100
+  Warehouse {lov} = WH01
+  Contract Number = C-100237
+  Description = Annual volume agreement
+  Contract Status = O - Open
+  Valid From = 01-Jan-2026
+  Valid To = 31-Dec-2026
+  Price Unit {lov} = LB
+  Currency {lov} = USD
+  Contract Quantity = 50,000
+  Quantity Ordered to Date {ro} = 12,000
+  Contract Quantity Outstanding {ro} = 38,000
+grid: Contract Price Breaks
+  # Break, Quantity | Price | Price Unit
+  0 | 4.250 | LB
+```
 
 ```steps
 1 | Define the contract price
-where: SYS_M_SALES_CONTRACT_PRICES
+where: sys_m_prices  (Price Type = Contract)
 do: agree a quantity cap at a fixed price over a date window for the customer / product.
-sys: writes `SALES_CONTRACT_PRICES` / `_LINES` — `CONTRACT_QTY`, `VALID_FROM/TO_DATE`, status O. Contract rows surface at runtime in `SOP_PRICES` with `PRICE_TYPE = "1"`.
+sys: writes a Contract-type row to `SOP_PRICES` / `_LINES` — `CONTRACT_QTY`, `VALID_FROM/TO_DATE`, status O, `PRICE_TYPE = "1"`.
 
 2 | Enter a normal sales order
 do: take an ordinary customer order — there is no special "blanket" order type to choose.
@@ -123,7 +148,7 @@ The short version: purchasing got a purpose-built blanket subsystem; sales split
 
 - `sop_l_get_prices` — sales price resolution; the contract tier (`PRICE_TYPE = "1"`) is tried first, gated by `CONTRACT_QTY_OUTSTANDING` and the validity window.
 - `sop_l_contract_price_qty_update` — writes the draw-down (`CONTRACT_QTY_ORD_TD += qty`).
-- `sop_m_controls` — `CONTRACT_PRICES_IN_USE` / `_OVERRIDE`; `SYS_M_SALES_CONTRACT_PRICES` defines the contracts.
+- `sys_m_prices` (Price Type = Contract) — maintains the contract on `SOP_PRICES`; `sop_m_controls` carries `CONTRACT_PRICES_IN_USE` / `_OVERRIDE`. (The standalone `SYS_M_SALES_CONTRACT_PRICES` program and the `SALES_CONTRACT_PRICES` tables are the retired predecessor.)
 - `sop_t_order_maintenance` modes `SOP_T_001D` / `SOP_T_001E` — stamp the `CONINV` / `CONSHP` order types.
 
 The buy-side counterpart — the real blanket-document engine — is covered in [the blanket purchase-order rundown](/q/q-002-blanket-purchase-orders).

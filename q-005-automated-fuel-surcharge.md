@@ -64,9 +64,28 @@ You define the code in Miscellaneous Adjustment Code maintenance; the header row
 - **`ADJUSTMENT_CALCULATION_TYPE`** — how it's figured:
 
 ```cards
-1 | Percent | A percentage of the line/order value — `MISC_ADJUSTMENT_PERCENT`. The usual choice for fuel.
-2 | Flat value | A fixed amount per document — `MISC_ADJUSTMENT_VALUE`.
+1 | Percent | A percentage of the line/order value; the master's default rate is `ADJUSTMENT_DEFAULT_PERCENT`. The usual choice for fuel.
+2 | Flat value | A fixed amount per document — `ADJUSTMENT_DEFAULT_VALUE`.
 3 | Value per UOM | A per-unit rate × quantity, in `ADJUSTMENT_UNIT` (e.g. per cwt, per case).
+```
+
+Defined once in the code master, a fuel surcharge is just a percent-increase code with a default rate and guard-rails:
+
+```screen
+title: Miscellaneous Adjustment Codes
+program: SYS_M_MISC_ADJUSTMENT_CODES
+context: Company = 01
+form:
+  Adjustment Code = FUEL
+  Description = Fuel Surcharge
+  Calculation Type = 1 - Percent of Value
+  Increase or Decrease = 1 - Increase
+  Default Percent = 12.50
+  Minimum Percent = 0.00
+  Maximum Percent = 25.00
+  GL Account {lov} = 4120-000
+  Allow Modify Desc = No
+  Currency {lov} = USD
 ```
 
 The master also carries a default rate and **min/max guard-rails** (`MINIMUM_ADJUSTMENT_PERCENT` / `MAXIMUM_ADJUSTMENT_PERCENT`), a GL account (`ADJUSTMENT_ACCOUNT`) so the surcharge posts to its own revenue line, and a description flag. When the code is attached to a document, the calc lives in `sop_l_maint_misc_adjustments` — and it's exactly the arithmetic you'd write by hand:

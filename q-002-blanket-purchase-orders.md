@@ -73,6 +73,31 @@ The blanket **master** is a header + line (`N`). Each **release** is captured as
 | `RELEASE_NO`, `REQUIRED_DATE` | POP_LINE_DETAILS | Sequential release number + one scheduled delivery date per row. |
 | `POP_QTY_RELEASED`, `POP_RELEASED_VALUE` | POP_VENDOR_RELEASES | Per-release ledger, keyed by vendor + release number. |
 
+Here's a blanket master (`N`) in Order Maintenance — the header carries the agreed window (**Effective** / **Expiry**), and each committed line sits in the grid with its agreed quantity and price:
+
+```screen
+title: Blanket Order Modification
+program: POP_T_ORDER_MAINTENANCE
+context: Order Type = N — Non-Released Blanket | Blanket Status = Active
+form:
+  Blanket Order {lov} = BLK-100045
+  Supplier {lov} = ACME-CHEM
+  Supplier Name {ro} = Acme Chemical Company
+  Order Date {ro} = 02-Jan-2026
+  Effective Date = 01-Jan-2026
+  Expiry Date = 31-Dec-2026
+  Credit Terms Code {lov} = N30  Net 30 Days
+  Pricing Method {lov} = Exclusive
+  Currency {ro} = USD  US Dollar
+grid: Order Lines
+  # Line,Numb | Ty | Product | Description | WH | Order Quantity | Unit | Price | Line Value
+  1 | S | RM-RESIN01 | Resin, Food Grade | WH01 | 10,000.000 | KG | 2.50 | 25,000.00
+  2 | S | RM-RESIN02 | Resin, Industrial Grade | WH01 | 5,000.000 | KG | 3.10 | 15,500.00
+  3 | S | RM-ADD-07 | Additive, Stabilizer | WH01 | 800.000 | KG | 9.75 | 7,800.00
+```
+
+Note what the line grid *doesn't* show: the running `POP_QTY_RELEASED` and `PO_QTY_OUTSTANDING` balances aren't columns here — those surface when you release against the master (next screen) and in Order Inquiry.
+
 ## 04 · The workflow, step by step
 
 ```steps
@@ -103,6 +128,31 @@ sys: releases flow through standard goods-receipt (GRN) and AP invoicing, keyed 
 do: when the contract is used up or past its end date, close it so no more releases can be raised against it.
 sys: Close Blanket Orders sets `POP_BLANKET_STATUS` to `C`.
 ```
+
+The release itself is its own program — call-offs against the master, each a dated row that rolls up into the line's released quantity:
+
+```screen
+title: Blanket Order Release
+program: POP_U_BLANKET_ORDER_RELEASE
+context: Blanket = BLK-100045 | Line = 1 | Status = Active
+form:
+  Blanket No {lov} = BLK-100045
+  Line No {lov} = 1
+  Supplier {ro} = ACME-CHEM
+  Product {ro} = RM-RESIN01
+  Warehouse {ro} = WH01
+  Maximum Line Qty {ro} = 10,000.000
+  Qty Released {ro} = 4,000.000
+  Maximum Line Value {ro} = 25,000.00
+  Value Released {ro} = 10,000.00
+grid: Release Details
+  # Required,Date | Rel,Nbr | Quantity | Pur,Unit | Price
+  20-Jan-2026 | 1 | 2,000.000 | KG | 2.50
+  20-Feb-2026 | 2 | 1,500.000 | KG | 2.50
+  20-Mar-2026 | 3 | 500.000 | KG | 2.50
+```
+
+The summary at the top is the whole over-release story in one place — **Maximum Line Qty** against **Qty Released** is the balance you're still allowed to draw. The rules below are what enforce it.
 
 ## 05 · The rules that stop you over-releasing
 

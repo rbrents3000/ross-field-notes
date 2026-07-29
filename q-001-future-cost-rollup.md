@@ -58,7 +58,22 @@ ELSE
 END_IF
 ```
 
-So cost type 20 ran in Future mode — as it's meant to. Both of your runs were future rollups.
+So cost type 20 ran in Future mode — as it's meant to. Both of your runs were future rollups. And here's why it's so easy to miss on the way in — the submission screen itself:
+
+```screen
+title: Standard/Future Cost Rollup
+program: PM_U_STD_COST_ROLLUP
+context: Company = 01
+form:
+  All Products = No
+  Warehouse {lov} = WH01
+  Product {lov} = FG100
+  Cost Type {lov} = 02  Preliminary
+  Valid From Date {ro} = 01-Jul-2026
+  Preliminary Cost Update? = No
+```
+
+There's a **Cost Type** field — and nowhere on the screen is there a *Mode* switch. Type `02` and you're in Standard mode; type anything else and you're in Future mode, with no on-screen tell that the choice was made for you. (The one giveaway is subtle: the **Preliminary Cost Update?** row only appears *because* `02` put the run in Standard mode — enter a future cost type and it isn't there.)
 
 ## Future mode never rebuilds the explosion
 

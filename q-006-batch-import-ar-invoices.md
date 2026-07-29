@@ -89,6 +89,29 @@ sys: it validates the batch — it must **balance to its control total** and pos
 note: `ar_r_batch_transactions_report` is the edit list / audit — run it before posting to catch an out-of-balance or wrong-period batch on paper, not in the ledger.
 ```
 
+Staged, a batch is just a header with a control total and one row per invoice — nothing has hit the ledger yet:
+
+```screen
+title: Amend AR Batch Transactions
+program: AR_T_MAINTAIN_BATCH_TRANSACTIONS
+context: Division = 10 | Batch = 2607 | Base = USD
+form:
+  Batch Number {ro} = 2607
+  Description = Monthly service invoices
+  Posting Period = 7
+  Year = 2026
+  Postings by Batch or Transaction = Transaction
+  Batch Transaction Type {lov} = IN — Invoices
+  Batch Control Total = 15,000.00
+grid: AR Batch Transaction Lines
+  # Bat,Seq | Customer,Number | Transaction,Date | Transaction,Description | Transaction,Value
+  1 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 01 | 5,000.00
+  2 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 02 | 5,000.00
+  3 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 03 | 5,000.00
+```
+
+The grid is a **summary** — sequence, customer, date, description, value; the invoice number, terms, and tax are keyed on each line's detail form. The batch's control total (here `15,000.00`) has to reconcile to the sum of its entered lines before the post program will run it.
+
 > **in the system** — the AR batch tables *are* the interface tables. That's the whole answer to "populates all of the correct tables": you populate `AR_BATCH_*`, and the post program fans the result out to the ledger, the tax lines, the GL postings, and the customer's open-item balance — consistently, every time.
 
 ## 04 · A repeating monthly bill? Mind the recurring gap

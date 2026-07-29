@@ -102,7 +102,7 @@ do: create a recipe whose principal product is `#scrap7000`, with a single ingre
 sys: writes `PROCESS_SPECIFICATIONS` with `PRINCIPAL_PRODUCT = #scrap7000` and one `RECIPE_LINES` input (`RECIPE_LINE_TYPE = "1"`).
 
 2 | Point the scrap item's costing spec at that recipe
-where: item / part master costing tab
+where: ic_m_product_warehouse — Manufacturing Details
 do: set the scrap item's costing factory, costing process spec, and version to the recipe you just made.
 sys: sets `PART_MASTER_M(COSTING_PROCESS_SPEC)` + `COSTING_FACTORY` + `COSTING_PROCESS_SPEC_VERSION`.
 
@@ -112,7 +112,26 @@ do: roll up the scrap item (and let the finished good roll first, bottom-up by B
 sys: a Make input contributes its own rolled standard, so the scrap inherits the finished good's cost.
 ```
 
-Why it works: when the rollup processes the scrap recipe, its single input is a Make item, so it pulls that input's **rolled standard cost** straight from `PRODUCT_WH_PRELIM_COSTS` —
+Here's where you wire it — the scrap item's **Manufacturing Details**, its costing spec pointed at its own one-line recipe (`SCRAP7000-COST`) instead of at the finished good:
+
+```screen
+title: Manufacturing Details
+program: IC_M_PRODUCT_WAREHOUSE
+context: Product = SCRAP7000 | Description = Scrap — costed = FG100 | Warehouse = WH1
+form:
+  Source Indicator {lov} = Make
+  Costing Factory {lov} = FAC1
+  Costing Process Spec {lov} = SCRAP7000-COST
+  Version Number {lov} = 1
+  Process Spec Description {ro} = Scrap 7000 cost recipe
+  Planning Factory {lov} = FAC1
+  Planning Product {lov} = SCRAP7000
+  Default %Loss = 0.00
+  Cost Category {lov} = 
+  Manufacture Lead Time = 0
+```
+
+The three load-bearing fields are **Costing Factory**, **Costing Process Spec**, and **Version Number** — set them to your scrap recipe and the rollup follows that pointer to cost `#scrap7000` as its own principal product. Why it works: when the rollup processes the scrap recipe, its single input is a Make item, so it pulls that input's **rolled standard cost** straight from `PRODUCT_WH_PRELIM_COSTS` —
 
 ```dml
 @program PM_L_INCREMENTAL_COSTS
