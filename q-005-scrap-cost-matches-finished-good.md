@@ -60,7 +60,7 @@ When you set `#scrap7000`'s costing spec to the finished good's spec, the rollup
 
 ## The rule underneath all of this: cost is conserved
 
-Before the fix, the idea that makes the whole thing click. A job accumulates one pool of cost — ingredients plus resources. Ross then hands that pool **out** to the outputs. It never invents extra cost for an output; whatever you assign to the scrap is subtracted from what's left for the finished good.
+Before the fix, here's the idea that makes the whole thing click. A job accumulates one pool of cost — ingredients plus resources. Ross then hands that pool **out** to the outputs. It never invents extra cost for an output; whatever you assign to the scrap is subtracted from what's left for the finished good.
 
 > **caution** — you cannot make the scrap carry the finished good's full cost *and* leave the finished good's cost unchanged **on the same job**. Any value the scrap picks up comes out of the finished good. That constraint is the real reason your plan ends in "…then delete the outputs" — you're capturing a valuation, then handing the cost back.
 
@@ -137,7 +137,7 @@ Now add `#scrap7000` as an output on the finished good's *production* recipe and
 @note A CREDITED BY-PRODUCT IS COSTED THROUGH THE SAME ROUTINE AS AN INGREDIENT
 @reads recipe_lines
 @risk its credit is its OWN item cost, not a share of the job pool
-@highlight 1-4
+@highlight 2-3
 IF (RECIPE_LINES(DESTINATION_TYPE) <> (PARAMETER("SOURCE_TYPE_STAGE")) AND &
     RECIPE_LINES(CREDIT_JOB_WITH_BYPRODUCT) = PARAMETER("LANGUAGE_YES"))
     PERFORM UPDATE_MATERIAL_COSTS      ! the same routine ingredient lines use
