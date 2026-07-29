@@ -21,6 +21,7 @@ key_refs:
   - "POP_VENDOR_RELEASES"
 related:
   - "q-003-blanket-orders-setup"
+  - "q-004-blanket-sales-orders"
 margin_notes:
   - "one field: POP_ORDER_TYPE ↴"
   - "master N, release R →"
