@@ -1,12 +1,12 @@
 ---
-num: "005"
+num: "007"
 title: "Can I output scrap on a job and have it carry the same cost as the finished good?"
 tag: "ROSS"
 audience: "developer"
 source: "group"
 date: "2026-07-29"
 system: "Ross ERP 8.0.1"
-reading_time: "8 min"
+reading_time: "10 min"
 excerpt: "Pointing an item's costing spec at another product won't roll a cost onto it — the rollup only posts to a spec's principal product. Give the scrap item its own one-line costing recipe with the finished good as the input, then output it as a credited by-product."
 question: "Has anyone figured out how to output scrap on a recipe/job and have it get the same cost as the finished good? We started with a manufactured part #scrap7000 and were hoping the costing spec would be 7000, but the cost won't roll up. Without making this a buy item and loading in the costs each month, is there a way in Ross to have this pick up the same cost as the #1 item? We're looking to get a true cost on scrap and output it to the job, then delete the outputs. We're on 8.0.1."
 restated: "In Ross process manufacturing, how can a scrap/by-product output on a job automatically carry the same cost as the finished good, without maintaining the scrap item as a purchased item with monthly cost loads?"
@@ -28,6 +28,7 @@ key_refs:
   - "RECIPE_LINES"
   - "PM_L_INCREMENTAL_COSTS"
   - "PRODUCT_WH_PRELIM_COSTS"
+  - "PRODUCT_WAREHOUSE"
 related:
   - "q-001-future-cost-rollup"
 ---
@@ -149,6 +150,42 @@ Report the scrap output on the job and it's valued at that "true cost." Because 
 - [ ] Want the scrap to *stay* in inventory at the finished good's value? Don't reverse it — let the credited by-product output stand. The scrap sits in stock at its standard (= the finished good) and the finished good absorbs the credit.
 - [ ] Want only a report figure, no lasting cost effect? Output, read it, reverse it.
 
+## If you cost on an actual/average type (the "DC" question)
+
+Everything above is the rolled-**standard** path. If the cost type you actually roll into is an actual/average flavour — the "DC" type in your setup — the good news is the trick still works, and for a reason that's easy to miss.
+
+When the rollup prices an input, where it reads the cost from depends on **both the cost type and whether the input is Make or Buy**:
+
+| Cost type | Buy input reads… | Make input reads… |
+| --- | --- | --- |
+| `02` Preliminary | `PRODUCT_WH_PRELIM_COSTS` | its own rolled preliminary cost |
+| `03` Weighted-average | `PRODUCT_WAREHOUSE.AVERAGE_COST` (→ `LAST_COST` fallback) | its own rolled cost |
+| `04` Last cost | `PRODUCT_WAREHOUSE.LAST_COST` | its own rolled cost |
+| `≥ 10` Future | `PRODUCT_WH_FUTURE_COSTS` | its own rolled cost |
+
+The average/last-cost override fires **only for Buy inputs** — the guard is explicit:
+
+```dml
+@program PM_L_INCREMENTAL_COSTS
+@note THE ACTUAL/AVERAGE OVERRIDE APPLIES TO BUY INPUTS ONLY
+@reads product_warehouse
+@risk a Make input never takes the average/last cost — it stays on its rolled cost
+@highlight 1-3
+IF (#MAKE_BUY <> PARAMETER("MAKE_FLAG") AND (#COST_TYPE = 3 OR #COST_TYPE = 4))
+    #STD_COST = FIN.PRODUCT_WAREHOUSE(STANDARD_COST)
+    IF (#COST_TYPE = 3 AND #VALUE_METHOD = #IC_COSTING_WAC)   ! type 03 = weighted-average
+        #STD_COST = FIN.PRODUCT_WAREHOUSE(AVERAGE_COST)       ! type 04 uses LAST_COST
+    END_IF
+END_IF
+```
+
+Your finished good is a **Make** item, so this override never touches it — the pass-through recipe still pulls `#7000`'s **rolled cost for that same cost type**, and `#scrap7000` inherits it. Two things follow:
+
+- **Roll the finished good into the DC type first**, bottom-up by BOM level, or the scrap recipe reads a stale/zero input. This is the same sequencing gotcha as a future rollup — see [the future cost rollup note](/q/q-001-future-cost-rollup): run the `02` preliminary pass to build the explosion, *then* the DC-type pass to reprice it.
+- **The by-product credit on the job** picks up whatever the scrap item's cost is on the basis the job uses — so on an actual/average job it credits at that actual value.
+
+> **caution** — the recipe gives scrap the finished good's *rolled* cost at each rollup, not a live moving average. If "DC" means you value stock at weighted-average and you need the scrap to track the finished good's cost *between* rollups, no rollup can do that — average cost moves with every transaction. Re-run the rollup on the cadence your DC type expects.
+
 ## There's no "copy another item's cost" switch
 
 Worth saying plainly, because it's the thing people go looking for: vanilla Ross has **no** "reference product cost," "like item," or "copy cost from another product" feature at the item level. The only cost-copy logic in the rollup copies values **between cost types for the same product** (e.g. Preliminary → Standard), never between two products. The manual alternative is exactly the one you're trying to avoid — a Buy item with costs keyed each period in Future/Standard Cost Maintenance. The pass-through costing recipe above is the supported way to get a **live** equal-cost link instead.
@@ -157,9 +194,9 @@ Worth saying plainly, because it's the thing people go looking for: vanilla Ross
 
 - `PART_MASTER_M(COSTING_PROCESS_SPEC / COSTING_FACTORY / COSTING_PROCESS_SPEC_VERSION)` — the per-item "costing spec" the rollup reads to decide which recipe costs the item.
 - `PROCESS_SPECIFICATIONS(PRINCIPAL_PRODUCT)` — a spec posts a standard cost to its principal product (and co-products), not to arbitrary outputs.
-- `PM_L_INCREMENTAL_COSTS` — costs ingredients and credited by-products through `UPDATE_MATERIAL_COSTS`; a Make input pulls its rolled standard from `PRODUCT_WH_PRELIM_COSTS`.
+- `PM_L_INCREMENTAL_COSTS` — costs ingredients and credited by-products through `UPDATE_MATERIAL_COSTS`; a Make input pulls its rolled standard from `PRODUCT_WH_PRELIM_COSTS`. For cost types 03/04, `#MAKE_BUY <> MAKE_FLAG` gates the `PRODUCT_WAREHOUSE` average/last-cost override — Buy inputs only.
 - `PM_I_COSTED_PROCESS_SPEC` — enumerates the five output kinds and how each is valued; a credited by-product shows as a negative input, `COST_ALLOCATION_PERCENT` forced to 0.
 - `RECIPE_LINES(CREDIT_JOB_WITH_BYPRODUCT / COST_ALLOCATION_PERCENT / FINAL_PRODUCT_FLAG)` — the flags that classify an output.
 - `IC_U_PRODUCT_COST_UPDATE` — the standard cost rollup driver.
 
-A couple of honest caveats. This was read from Ross 8.0 source; the mechanism is standard and unchanged through 8.0.1, though exact line numbers shift by patch level — the stable landmarks are the `COSTING_PROCESS_SPEC` read and the `CREDIT_JOB_WITH_BYPRODUCT` branch. And if you run an actual/average cost type rather than a rolled standard, the same structure holds but the input cost is read from the warehouse average/last cost instead of the preliminary-cost table — tell me which cost type you actually roll into and I'll trace that exact path.
+One honest caveat. This was read from Ross 8.0 source; the mechanism is standard and unchanged through 8.0.1, though exact line numbers shift by patch level — the stable landmarks are the `COSTING_PROCESS_SPEC` read, the `CREDIT_JOB_WITH_BYPRODUCT` branch, and the `#MAKE_BUY <> MAKE_FLAG AND #COST_TYPE = 3/4` override. Cost types 03/04 are the weighted-average / last-cost flavours; a site names its own types, so map your "DC" to whichever number it carries and read the row above for it.
