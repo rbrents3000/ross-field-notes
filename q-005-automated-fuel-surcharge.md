@@ -6,7 +6,7 @@ audience: "developer"
 source: "group"
 date: "2026-07-29"
 system: "Ross ERP 8.0"
-reading_time: "9 min"
+reading_time: "8 min"
 excerpt: "There's no 'fuel surcharge' object in Ross. You model it as a Miscellaneous Adjustment 'increase' code (a discrete charge line) or a Trade Promotions 'price addition' (an automatic uplift folded into the price). Standard Ross does the surcharge arithmetic — what it never does is re-index the rate to a published diesel price. That last mile is a small scheduled rate refresh."
 question: "Fuel cost is high and at some point, we have to consider a fuel surcharge. Has anyone implemented an automated solution for this? We've discussed it many times through the years and have yet to come up with a way to utilize 'standard' functionality to handle that."
 restated: "Does standard Ross Order Management have a way to add a fuel surcharge to customer orders automatically — ideally indexed to fuel prices — using vanilla functionality rather than a custom build?"
@@ -18,6 +18,8 @@ key_refs:
   - "SALES_ORDER_MISC_ADJS"
   - "TP_PRICINGS"
   - "sop_l_maint_misc_adjustments"
+related:
+  - "q-004-blanket-sales-orders"
 applies_when:
   - "You want fuel to show as its own line on the invoice, not buried in the unit price."
   - "You've gone looking for a 'surcharge' object in Order Management and come up empty."
@@ -75,7 +77,7 @@ The master also carries a default rate and **min/max guard-rails** (`MINIMUM_ADJ
 @reads miscellaneous_adjustments  (adjustment_inc_or_dec, adjustment_calculation_type)
 @writes sales_misc_adjustments_vt.misc_adjustment_total_value
 @risk the rate is a static field — nothing here looks at a fuel index
-@highlight 3-9
+@highlight 10-13
 #LINE_VALUE_DISCOUNTED = #LINE_VALUE
 IF (SALES_MISC_ADJUSTMENTS_VT(ADJUSTMENT_INC_OR_DEC) <> 1)
     #TOTAL_VALUE_MULTIPLIER = -1.0          ! an allowance
