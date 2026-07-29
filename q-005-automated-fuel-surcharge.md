@@ -129,7 +129,7 @@ You set it up as a `TP_PRICINGS` record with the addition type, and it gives you
 
 ## 04 · The part that genuinely isn't standard — indexing to diesel
 
-Here's the piece MW's instinct is right about, and it's worth saying plainly: **no version of this is fully "standard," because the automation people actually want is the rate following fuel prices — and nothing in Ross reads a fuel index.** This isn't a Ross gap so much as an ERP-industry one; the shops that do it "automatically" all bolt a rating layer on (TMS rate matrices, accessorial masters), not core order entry.
+Here's the piece the question gets exactly right, and it's worth saying plainly: **no version of this is fully "standard," because the automation people actually want is the rate following fuel prices — and nothing in Ross reads a fuel index.** This isn't a Ross gap so much as an ERP-industry one; the shops that do it "automatically" all bolt a rating layer on (TMS rate matrices, accessorial masters), not core order entry.
 
 The good news is the indexing logic is trivial and well-standardized in freight. Two common models:
 
