@@ -131,7 +131,30 @@ END_IF
 
 ## Outputting it on the job — and why "then delete" behaves
 
-Now add `#scrap7000` as an output on the finished good's *production* recipe and flag it **Credit job with by-product = Yes**. A credited by-product is run through the very same costing routine as an ingredient — as a negative input, valued at its own standard (which you've just made equal to the finished good):
+```screen
+title: Recipe Maintenance
+program: PM_M_RECIPES
+context: Recipe = FG100-PROD | Primary Product = FG100 | Description = Finished Good 100 | Version = 1 (Active)
+form:
+  Recipe Code {ro} = FG100-PROD
+  Version {ro} = 1
+  Primary Product {lov} = FG100
+  Description = Finished Good 100 — production
+grid: Recipe Lines
+  # Line | Type | Product / Resource | Description | Qty | UOM | Cost Alloc % | Credit By-product | Final Product
+  ~ Ingredients (Materials)
+  10 | Ingredient | RM-FLOUR | Flour, bakers | 50.000 | LB | | |
+  20 | Ingredient | RM-CHEESE | Mozzarella | 30.000 | LB | | |
+  30 | Ingredient | RM-SAUCE | Pizza sauce | 20.000 | LB | | |
+  ~ Resources
+  40 | Machine | MIX-01 | Mixer / make-up line | 0.500 | HR | | |
+  50 | Labour | LAB-PROD | Production labour | 1.000 | HR | | |
+  ~ Outputs
+  60 | Product | FG100 | Finished Good 100 | 100.000 | CASE | 100.00 | No | Yes
+  70 | By-product | SCRAP7000 | Scrap — costed = FG100 | 5.000 | CASE | 0.00 | Yes | No
+```
+
+Here's that production recipe in the current client — the scrap sits on **line 70** as a credited by-product (`Credit By-product = Yes`, `Cost Alloc % = 0`), alongside `FG100` as the final product at 100%. Now add `#scrap7000` as an output on the finished good's *production* recipe and flag it **Credit job with by-product = Yes**. A credited by-product is run through the very same costing routine as an ingredient — as a negative input, valued at its own standard (which you've just made equal to the finished good):
 
 ```dml
 @program PM_L_INCREMENTAL_COSTS
