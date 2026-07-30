@@ -64,6 +64,7 @@ So cost type 20 ran in Future mode — as it's meant to. Both of your runs were 
 title: Standard/Future Cost Rollup
 program: PM_U_STD_COST_ROLLUP
 facility: PM_U_047
+toc: Product Costing > Standard/Future Cost Rollup
 context: Company = 01
 form:
   All Products = No

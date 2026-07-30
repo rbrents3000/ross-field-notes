@@ -75,6 +75,7 @@ Defined once in the code master, a fuel surcharge is just a percent-increase cod
 title: Miscellaneous Adjustment Codes
 program: SYS_M_MISC_ADJUSTMENT_CODES
 facility: SYS_M_158
+toc: Sales > Pricing > Promotions > Misc Adjustment Codes
 context: Company = 01
 form:
   Adjustment Code = FUEL

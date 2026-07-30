@@ -79,6 +79,7 @@ Here's a blanket master (`N`) in Order Maintenance — the header carries the ag
 title: Blanket Order Modification
 program: POP_T_ORDER_MAINTENANCE
 facility: POP_T_017
+toc: Purchasing > Orders > Blanket PO - Non Rel
 context: Order Type = N — Non-Released Blanket | Blanket Status = Active
 form:
   Blanket Order {lov} = BLK-100045
@@ -136,6 +137,7 @@ The release itself is its own program — call-offs against the master, each a d
 title: Blanket Order Release
 program: POP_U_BLANKET_ORDER_RELEASE
 facility: POP_U_018
+toc: Purchasing > Orders > Release Blanket
 context: Blanket = BLK-100045 | Line = 1 | Status = Active
 form:
   Blanket No {lov} = BLK-100045

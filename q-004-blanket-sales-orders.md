@@ -50,6 +50,7 @@ Here's one such contract in Price Maintenance — the customer, the product, the
 title: Sales Prices
 program: SYS_M_PRICES
 facility: SYS_M_267
+toc: Sales > Pricing > Prices > Sales Prices
 context: Company = 01 | Price Type = Contract
 form:
   Customer Number {lov} = CUST-4021
