@@ -125,7 +125,7 @@ form:
   Costing Factory {lov} = FAC1  ! PART_MASTER_M.COSTING_FACTORY — Factory whose process spec drives standard costing
   Costing Process Spec {lov} = SCRAP7000-COST  ! PART_MASTER_M.COSTING_PROCESS_SPEC — Process specification used to cost the product
   Version Number {lov} = 1  ! PART_MASTER_M.COSTING_PROCESS_SPEC_VERSION — Version of the costing process spec
-  Process Spec Description {ro} = Scrap 7000 cost recipe  ! Description of the selected costing process spec
+  Process Spec Description {ro} = Scrap 7000 cost recipe  ! PROCESS_SPECIFICATIONS.DESCRIPTION {TEXT} — description of the selected costing process spec
   Planning Factory {lov} = FAC1  ! PART_MASTER_M.PLANNING_FACTORY — Factory used to plan production of the item
   Planning Product {lov} = SCRAP7000  ! PART_MASTER_M.PLANNING_PRODUCT — Product code used for planning
   Default %Loss = 0.00  ! PART_MASTER_M.DEFAULT_YIELD — Default expected percentage material loss

@@ -61,7 +61,7 @@ form:
   Contract Status = O - Open  ! SOP_PRICES.SYS_CONTRACT_STATUS_FLAG {TEXT} — Open/closed flag; C closes the contract to sales
   Valid From = 01-Jan-2026  ! SOP_PRICES.VALID_FROM_DATE {DATE_TIME} — Date the price becomes effective
   Valid To = 31-Dec-2026  ! SOP_PRICES.VALID_TO_DATE {DATE_TIME} — Date the price expires
-  Price Unit {lov} = LB  ! Unit of measure the price is quoted in
+  Price Unit {lov} = LB  ! SOP_PRICES.UNIT_PRICE {TEXT} — pricing unit of measure (a UOM code, e.g. LB)
   Currency {lov} = USD  ! SOP_PRICES.SYS_CURRENCY_CODE {TEXT} — Currency the price is expressed in
   Contract Quantity = 50,000  ! SOP_PRICES.CONTRACT_QTY {QUADWORD} — Total contracted quantity, in pricing units
   Quantity Ordered to Date {ro} = 12,000  ! SOP_PRICES.CONTRACT_QTY_ORD_TD {QUADWORD} — Quantity ordered against the contract so far

@@ -84,7 +84,7 @@ context: Order Type = N — Non-Released Blanket | Blanket Status = Active
 form:
   Blanket Order {lov} = BLK-100045  ! POP_HEADERS.PO_NUMBER {TEXT} — Blanket purchase order number (header key)
   Supplier {lov} = ACME-CHEM  ! POP_HEADERS.VENDOR_NUMBER {TEXT} — Supplier the order is placed with
-  Supplier Name {ro} = Acme Chemical Company  ! Supplier's name, looked up from the vendor master
+  Supplier Name {ro} = Acme Chemical Company  ! VENDORS.VENDOR_NAME {TEXT} — supplier's name, displayed from the vendor master
   Order Date {ro} = 02-Jan-2026  ! POP_HEADERS.ORDER_DATE {DATE_TIME} — Date the order was raised
   Effective Date = 01-Jan-2026  ! POP_HEADERS.POP_EFFECTIVE_DATE {DATE_TIME} — Date the blanket order becomes effective
   Expiry Date = 31-Dec-2026  ! POP_HEADERS.EXPIRY_DATE {DATE_TIME} — Date the blanket order expires
