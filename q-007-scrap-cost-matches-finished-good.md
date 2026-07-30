@@ -119,7 +119,7 @@ title: Manufacturing Details
 program: IC_M_PRODUCT_WAREHOUSE
 facility: IC_M_046B
 toc: Manufacturing > Master > Reference > Product Warehouse
-context: Product = SCRAP7000 | Description = Scrap — costed = FG100 | Warehouse = WH1
+context: Product = SCRAP7000  ! PRODUCT_WAREHOUSE.PART_CODE {TEXT} — product code | Description = Scrap — costed = FG100  ! product description | Warehouse = WH1  ! PRODUCT_WAREHOUSE.WAREHOUSE {TEXT} — warehouse
 form:
   Source Indicator {lov} = Make  ! PRODUCT_WAREHOUSE.MAKE_BUY {TEXT} — Make, buy, or transfer sourcing for the item
   Costing Factory {lov} = FAC1  ! PART_MASTER_M.COSTING_FACTORY — Factory whose process spec drives standard costing
@@ -157,14 +157,14 @@ title: Recipe Maintenance
 program: PM_M_RECIPES
 facility: PM_M_001
 toc: Manufacturing > Master > Recipe > Create Recipe
-context: Recipe = FG100-PROD | Primary Product = FG100 | Description = Finished Good 100 | Version = 1 (Active)
+context: Recipe = FG100-PROD  ! RECIPES.RECIPE_CODE {TEXT} — recipe code | Primary Product = FG100  ! primary product the recipe makes | Description = Finished Good 100  ! RECIPES.DESCRIPTION {TEXT} — recipe description | Version = 1 (Active)  ! RECIPES.SYS_VERSION_NUMBER {LONGWORD} — recipe version
 form:
   Recipe Code {ro} = FG100-PROD  ! RECIPES.RECIPE_CODE {TEXT} — Unique code identifying the recipe
   Version {ro} = 1  ! RECIPES.SYS_VERSION_NUMBER {LONGWORD} — Version number of the recipe
   Primary Product {lov} = FG100  ! Primary product the recipe produces
   Description = Finished Good 100 — production  ! RECIPES.DESCRIPTION {TEXT} — Descriptive text for the recipe
 grid: Recipe Lines
-  # Line | Type | Product /,Resource | Description | Qty | UOM | Cost,Alloc % | Credit,By-product | Final,Product
+  # Line ! RECIPE_LINES.RECIPE_LINE_NUMBER {WORD} — recipe line number | Type ! RECIPE_LINES.RECIPE_LINE_TYPE — recipe line type | Product /,Resource ! RECIPE_LINES.PART_CODE {TEXT} — product or resource | Description ! PRODUCT_MASTER.PART_DESC_1 {TEXT} — product description | Qty ! RECIPE_LINES.INPUT_QTY {MANU_QTY} — input quantity | UOM ! RECIPE_LINES.INPUT_UNIT {TEXT} — input unit of measure | Cost,Alloc % ! RECIPE_LINES.COST_ALLOCATION_PERCENT — cost allocation percent | Credit,By-product ! RECIPE_LINES.CREDIT_JOB_WITH_BYPRODUCT — credit job with by-product | Final,Product ! RECIPE_LINES.FINAL_PRODUCT_FLAG — final product to inventory
   ~ Ingredients (Materials)
   10 | Ingredient | RM-FLOUR | Flour, bakers | 50.000 | LB | | |
   20 | Ingredient | RM-CHEESE | Mozzarella | 30.000 | LB | | |

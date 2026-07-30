@@ -51,7 +51,7 @@ title: Sales Prices
 program: SYS_M_PRICES
 facility: SYS_M_267
 toc: Sales > Pricing > Prices > Sales Prices
-context: Company = 01 | Price Type = Contract
+context: Company = 01  ! COMPANY_CODE {TEXT} — company code | Price Type = Contract  ! SOP_PRICES.PRICE_TYPE {WORD} — sales price type
 form:
   Customer Number {lov} = CUST-4021  ! SOP_PRICES.CUSTOMER_NUMBER {TEXT} — Customer the contract price applies to
   Product {lov} = FG100  ! SOP_PRICES.PART_CODE {TEXT} — Product the price applies to
@@ -67,7 +67,7 @@ form:
   Quantity Ordered to Date {ro} = 12,000  ! SOP_PRICES.CONTRACT_QTY_ORD_TD {QUADWORD} — Quantity ordered against the contract so far
   Contract Quantity Outstanding {ro} = 38,000  ! SOP_PRICES.CONTRACT_QTY_OUTSTANDING {QUADWORD} — Computed: contract qty minus ordered-to-date
 grid: Contract Price Breaks
-  # Break, Quantity | Price | Price Unit
+  # Break, Quantity ! SOP_PRICE_LINES.QTY_VALUE_BREAK {CURRENCY_PRICE} — quantity/value price break | Price ! SOP_PRICE_LINES.SALES_PRICE {CURRENCY_PRICE} — sales price at this break | Price Unit ! SOP_PRICES.UNIT_PRICE {TEXT} — pricing unit of measure
   0 | 4.250 | LB
 ```
 

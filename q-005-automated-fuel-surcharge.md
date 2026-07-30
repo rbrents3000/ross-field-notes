@@ -76,7 +76,7 @@ title: Miscellaneous Adjustment Codes
 program: SYS_M_MISC_ADJUSTMENT_CODES
 facility: SYS_M_158
 toc: Sales > Pricing > Promotions > Misc Adjustment Codes
-context: Company = 01
+context: Company = 01  ! COMPANY_CODE {TEXT} — company code
 form:
   Adjustment Code = FUEL  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_CODE {TEXT} — Unique identifier for an adjustment
   Description = Fuel Surcharge  ! MISCELLANEOUS_ADJUSTMENTS.DESCRIPTION {TEXT} — Short description of the adjustment code

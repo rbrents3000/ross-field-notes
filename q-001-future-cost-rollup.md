@@ -65,7 +65,7 @@ title: Standard/Future Cost Rollup
 program: PM_U_STD_COST_ROLLUP
 facility: PM_U_047
 toc: Product Costing > Standard/Future Cost Rollup
-context: Company = 01
+context: Company = 01  ! COMPANY_CODE {TEXT} — company code
 form:
   All Products = No  ! Roll up all products, or limit to a selection
   Warehouse {lov} = WH01  ! Warehouse(s) to include in the rollup

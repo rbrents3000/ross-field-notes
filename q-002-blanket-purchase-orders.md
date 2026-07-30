@@ -80,7 +80,7 @@ title: Blanket Order Modification
 program: POP_T_ORDER_MAINTENANCE
 facility: POP_T_017
 toc: Purchasing > Orders > Blanket PO - Non Rel
-context: Order Type = N — Non-Released Blanket | Blanket Status = Active
+context: Order Type = N — Non-Released Blanket  ! order type (N = non-released blanket) | Blanket Status = Active  ! blanket order status
 form:
   Blanket Order {lov} = BLK-100045  ! POP_HEADERS.PO_NUMBER {TEXT} — Blanket purchase order number (header key)
   Supplier {lov} = ACME-CHEM  ! POP_HEADERS.VENDOR_NUMBER {TEXT} — Supplier the order is placed with
@@ -92,7 +92,7 @@ form:
   Pricing Method {lov} = Exclusive  ! POP_HEADERS.PRICING_METHOD {WORD} — Tax-exclusive or tax-inclusive pricing method
   Currency {ro} = USD  US Dollar  ! POP_HEADERS.SYS_CURRENCY_CODE {TEXT} — Transaction currency code for the order
 grid: Order Lines
-  # Line,Numb | Ty | Product | Description | WH | Order Quantity | Unit | Price | Line Value
+  # Line,Numb ! POP_LINES.PO_LINE_NUMBER {LONGWORD} — order line number | Ty ! POP_LINES.PO_LINE_TYPE {TEXT} — line type | Product ! POP_LINES.PART_CODE {TEXT} — product code | Description ! PRODUCT_MASTER.PART_DESC_1 {TEXT} — product description | WH ! POP_LINES.WAREHOUSE {TEXT} — warehouse | Order Quantity ! POP_LINES.ORDER_QUANTITY {INVENTORY_QTY} — order quantity | Unit ! POP_LINES.UNIT_PUR {TEXT} — purchase unit of measure | Price ! POP_LINES.PURCHASE_PRICE {COST} — purchase price | Line Value ! POP_LINES.POP_ORDER_TOTAL_CURRENCY {CURRENCY} — total line value
   1 | S | RM-RESIN01 | Resin, Food Grade | WH01 | 10,000.000 | KG | 2.50 | 25,000.00
   2 | S | RM-RESIN02 | Resin, Industrial Grade | WH01 | 5,000.000 | KG | 3.10 | 15,500.00
   3 | S | RM-ADD-07 | Additive, Stabilizer | WH01 | 800.000 | KG | 9.75 | 7,800.00
@@ -138,7 +138,7 @@ title: Blanket Order Release
 program: POP_U_BLANKET_ORDER_RELEASE
 facility: POP_U_018
 toc: Purchasing > Orders > Release Blanket
-context: Blanket = BLK-100045 | Line = 1 | Status = Active
+context: Blanket = BLK-100045  ! POP_HEADERS.PO_NUMBER {TEXT} — blanket order number | Line = 1  ! POP_LINES.PO_LINE_NUMBER {LONGWORD} — order line number | Status = Active  ! blanket line status
 form:
   Blanket No {lov} = BLK-100045  ! POP_HEADERS.PO_NUMBER {TEXT} — Blanket order number being released
   Line No {lov} = 1  ! POP_LINES.PO_LINE_NUMBER {LONGWORD} — Order line number on the blanket order
@@ -150,7 +150,7 @@ form:
   Maximum Line Value {ro} = 25,000.00  ! POP_LINES.POP_ORDER_TOTAL_CURRENCY {CURRENCY} — Total blanket line value in order currency
   Value Released {ro} = 10,000.00  ! POP_LINES.POP_RELEASED_VALUE {MONEY} — Value already released against the line
 grid: Release Details
-  # Required,Date | Rel,Nbr | Quantity | Pur,Unit | Price
+  # Required,Date ! POP_LINE_DETAILS.REQUIRED_DATE {DATE_TIME} — required date | Rel,Nbr ! POP_LINE_DETAILS.RELEASE_NO {LONGWORD} — release number | Quantity ! quantity released on this line | Pur,Unit ! POP_LINE_DETAILS.UNIT_PUR {TEXT} — purchase unit of measure | Price ! POP_LINE_DETAILS.PURCHASE_PRICE {COST} — purchase price
   20-Jan-2026 | 1 | 2,000.000 | KG | 2.50
   20-Feb-2026 | 2 | 1,500.000 | KG | 2.50
   20-Mar-2026 | 3 | 500.000 | KG | 2.50

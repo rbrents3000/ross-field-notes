@@ -96,7 +96,7 @@ title: Amend AR Batch Transactions
 program: AR_T_MAINTAIN_BATCH_TRANSACTIONS
 facility: AR_M_001
 toc: Accounts Receivable > Transactions > Amend Batches
-context: Division = 10 | Batch = 2607 | Base = USD
+context: Division = 10  ! AR_BATCH_TRANSACTIONS.DIVISION {TEXT} — division | Batch = 2607  ! AR_BATCH_TRANSACTIONS.BATCH_NUMBER {LONGWORD} — batch number | Base = USD  ! base currency of the batch
 form:
   Batch Number {ro} = 2607  ! AR_BATCH_TRANSACTIONS.BATCH_NUMBER {LONGWORD} — Batch identifier, entered or auto-assigned by AR
   Description = Monthly service invoices  ! AR_BATCH_TRANSACTIONS.BATCH_DESCRIPTION {TEXT} — Free-text description of the batch
@@ -106,7 +106,7 @@ form:
   Batch Transaction Type {lov} = IN — Invoices  ! AR_BATCH_TRANSACTIONS.TRANSACTION_TYPE {TEXT} — Transaction type code governing the batch's postings
   Batch Control Total = 15,000.00  ! AR_BATCH_TRANSACTIONS.BATCH_CONTROL_TOTAL {CURRENCY} — Expected hash total of all postings in the batch
 grid: AR Batch Transaction Lines
-  # Bat,Seq | Customer,Number | Transaction,Date | Transaction,Description | Transaction,Value
+  # Bat,Seq ! AR_BATCH_TRAN_LINES.BATCH_SEQUENCE_NUMBER {WORD} — batch sequence number | Customer,Number ! AR_BATCH_TRAN_LINES.CUSTOMER_NUMBER {TEXT} — customer number | Transaction,Date ! AR_BATCH_TRAN_LINES.TRANSACTION_DATE {DATE_TIME} — transaction date | Transaction,Description ! AR_BATCH_TRAN_LINES.TRANSACTION_DESCRIPTION {TEXT} — transaction description | Transaction,Value ! AR_BATCH_TRAN_LINES.AR_TRAN_TOTAL_CURRENCY {CURRENCY} — total transaction value
   1 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 01 | 5,000.00
   2 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 02 | 5,000.00
   3 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 03 | 5,000.00
