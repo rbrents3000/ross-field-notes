@@ -61,10 +61,10 @@ facility: SYS_M_048B
 toc: Inventory Control > Master > Product Master — LPN Nesting
 context: Product = FG1000 | Description = Shared finished good | Company = 01
 form:
-  PLPN Entry at {lov} = 2 — End
-  No. of CLPNs = 12
-  CLPN Default Quantity = 24.000
-  Serialization in Use {y/n} = Yes
+  PLPN Entry at {lov} = 2 — End  ! PRODUCT_MASTER.DC_PLPN_LEVEL {WORD} — nesting mode: 0 Not in Use / 1 Beginning / 2 End
+  No. of CLPNs = 12  ! PRODUCT_MASTER.DC_CLPN_COUNT {WORD} — child (case) plates per parent; capped by system param DC_MAX_CLPNS
+  CLPN Default Quantity = 24.000  ! PRODUCT_MASTER.DC_CLPN_DEFAULT_QUANTITY {INVENTORY_QTY} — default units per each case plate
+  Serialization in Use = Yes  ! PRODUCT_MASTER.GS1_IN_USE {YES_NO} — GS1/SSCC serialization on/off for this product
 ```
 
 - **PLPN Entry at** (`DC_PLPN_LEVEL`) — the on/off + mode switch. Domain is `0 / 1 / 2`: **0 = Not in Use** (no nesting), **1 = Beginning**, **2 = End**. The two non-zero modes select *where in the LPN build* the parent (pallet) plate is introduced — beginning vs. ending level — but for your purposes the load-bearing distinction is simply **0 vs. non-zero**: non-zero means this product nests.
