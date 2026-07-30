@@ -117,6 +117,7 @@ Here's where you wire it — the scrap item's **Manufacturing Details**, its cos
 ```screen
 title: Manufacturing Details
 program: IC_M_PRODUCT_WAREHOUSE
+facility: IC_M_046B
 context: Product = SCRAP7000 | Description = Scrap — costed = FG100 | Warehouse = WH1
 form:
   Source Indicator {lov} = Make
@@ -153,6 +154,7 @@ END_IF
 ```screen
 title: Recipe Maintenance
 program: PM_M_RECIPES
+facility: PM_M_001
 context: Recipe = FG100-PROD | Primary Product = FG100 | Description = Finished Good 100 | Version = 1 (Active)
 form:
   Recipe Code {ro} = FG100-PROD

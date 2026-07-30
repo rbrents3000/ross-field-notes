@@ -94,6 +94,7 @@ Staged, a batch is just a header with a control total and one row per invoice â€
 ```screen
 title: Amend AR Batch Transactions
 program: AR_T_MAINTAIN_BATCH_TRANSACTIONS
+facility: AR_M_001
 context: Division = 10 | Batch = 2607 | Base = USD
 form:
   Batch Number {ro} = 2607
