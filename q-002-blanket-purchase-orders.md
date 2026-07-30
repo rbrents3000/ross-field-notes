@@ -82,15 +82,15 @@ facility: POP_T_017
 toc: Purchasing > Orders > Blanket PO - Non Rel
 context: Order Type = N — Non-Released Blanket | Blanket Status = Active
 form:
-  Blanket Order {lov} = BLK-100045
-  Supplier {lov} = ACME-CHEM
-  Supplier Name {ro} = Acme Chemical Company
-  Order Date {ro} = 02-Jan-2026
-  Effective Date = 01-Jan-2026
-  Expiry Date = 31-Dec-2026
-  Credit Terms Code {lov} = N30  Net 30 Days
-  Pricing Method {lov} = Exclusive
-  Currency {ro} = USD  US Dollar
+  Blanket Order {lov} = BLK-100045  ! POP_HEADERS.PO_NUMBER {TEXT} — Blanket purchase order number (header key)
+  Supplier {lov} = ACME-CHEM  ! POP_HEADERS.VENDOR_NUMBER {TEXT} — Supplier the order is placed with
+  Supplier Name {ro} = Acme Chemical Company  ! Supplier's name, looked up from the vendor master
+  Order Date {ro} = 02-Jan-2026  ! POP_HEADERS.ORDER_DATE {DATE_TIME} — Date the order was raised
+  Effective Date = 01-Jan-2026  ! POP_HEADERS.POP_EFFECTIVE_DATE {DATE_TIME} — Date the blanket order becomes effective
+  Expiry Date = 31-Dec-2026  ! POP_HEADERS.EXPIRY_DATE {DATE_TIME} — Date the blanket order expires
+  Credit Terms Code {lov} = N30  Net 30 Days  ! POP_HEADERS.CREDIT_TERMS_CODE {TEXT} — Payment/credit terms code for the order
+  Pricing Method {lov} = Exclusive  ! POP_HEADERS.PRICING_METHOD {WORD} — Tax-exclusive or tax-inclusive pricing method
+  Currency {ro} = USD  US Dollar  ! POP_HEADERS.SYS_CURRENCY_CODE {TEXT} — Transaction currency code for the order
 grid: Order Lines
   # Line,Numb | Ty | Product | Description | WH | Order Quantity | Unit | Price | Line Value
   1 | S | RM-RESIN01 | Resin, Food Grade | WH01 | 10,000.000 | KG | 2.50 | 25,000.00
@@ -140,15 +140,15 @@ facility: POP_U_018
 toc: Purchasing > Orders > Release Blanket
 context: Blanket = BLK-100045 | Line = 1 | Status = Active
 form:
-  Blanket No {lov} = BLK-100045
-  Line No {lov} = 1
-  Supplier {ro} = ACME-CHEM
-  Product {ro} = RM-RESIN01
-  Warehouse {ro} = WH01
-  Maximum Line Qty {ro} = 10,000.000
-  Qty Released {ro} = 4,000.000
-  Maximum Line Value {ro} = 25,000.00
-  Value Released {ro} = 10,000.00
+  Blanket No {lov} = BLK-100045  ! POP_HEADERS.PO_NUMBER {TEXT} — Blanket order number being released
+  Line No {lov} = 1  ! POP_LINES.PO_LINE_NUMBER {LONGWORD} — Order line number on the blanket order
+  Supplier {ro} = ACME-CHEM  ! POP_HEADERS.VENDOR_NUMBER {TEXT} — Supplier on the blanket order
+  Product {ro} = RM-RESIN01  ! POP_LINES.PART_CODE {TEXT} — Product code on the order line
+  Warehouse {ro} = WH01  ! POP_LINES.WAREHOUSE {TEXT} — Warehouse the line is delivered to
+  Maximum Line Qty {ro} = 10,000.000  ! POP_LINES.ORDER_QUANTITY {INVENTORY_QTY} — Total blanket line quantity available to release
+  Qty Released {ro} = 4,000.000  ! POP_LINES.POP_QTY_RELEASED {INVENTORY_QTY} — Quantity already released against the line
+  Maximum Line Value {ro} = 25,000.00  ! POP_LINES.POP_ORDER_TOTAL_CURRENCY {CURRENCY} — Total blanket line value in order currency
+  Value Released {ro} = 10,000.00  ! POP_LINES.POP_RELEASED_VALUE {MONEY} — Value already released against the line
 grid: Release Details
   # Required,Date | Rel,Nbr | Quantity | Pur,Unit | Price
   20-Jan-2026 | 1 | 2,000.000 | KG | 2.50

@@ -78,16 +78,16 @@ facility: SYS_M_158
 toc: Sales > Pricing > Promotions > Misc Adjustment Codes
 context: Company = 01
 form:
-  Adjustment Code = FUEL
-  Description = Fuel Surcharge
-  Calculation Type = 1 - Percent of Value
-  Increase or Decrease = 1 - Increase
-  Default Percent = 12.50
-  Minimum Percent = 0.00
-  Maximum Percent = 25.00
-  GL Account {lov} = 4120-000
-  Allow Modify Desc = No
-  Currency {lov} = USD
+  Adjustment Code = FUEL  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_CODE {TEXT} — Unique identifier for an adjustment
+  Description = Fuel Surcharge  ! MISCELLANEOUS_ADJUSTMENTS.DESCRIPTION {TEXT} — Short description of the adjustment code
+  Calculation Type = 1 - Percent of Value  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_CALCULATION_TYPE {WORD} — How the value is calculated: percent, flat, per-unit
+  Increase or Decrease = 1 - Increase  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_INC_OR_DEC {WORD} — Whether the adjustment raises or lowers the value
+  Default Percent = 12.50  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_DEFAULT_PERCENT {PERCENT} — Default percentage applied to the transaction value
+  Minimum Percent = 0.00  ! MISCELLANEOUS_ADJUSTMENTS.MINIMUM_ADJUSTMENT_PERCENT {PERCENT} — Lowest percentage allowed for the adjustment
+  Maximum Percent = 25.00  ! MISCELLANEOUS_ADJUSTMENTS.MAXIMUM_ADJUSTMENT_PERCENT {PERCENT} — Highest percentage allowed for the adjustment
+  GL Account {lov} = 4120-000  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_ACCOUNT {GL_ACCOUNT} — GL account for posting the adjustment value
+  Allow Modify Desc = No  ! MISCELLANEOUS_ADJUSTMENTS.ADJUSTMENT_DESC_MODIFY {YES_NO} — Whether the description can be edited at entry
+  Currency {lov} = USD  ! MISCELLANEOUS_ADJUSTMENTS.SYS_CURRENCY_CODE {TEXT} — Valid currency code for the adjustment
 ```
 
 The master also carries a default rate and **min/max guard-rails** (`MINIMUM_ADJUSTMENT_PERCENT` / `MAXIMUM_ADJUSTMENT_PERCENT`), a GL account (`ADJUSTMENT_ACCOUNT`) so the surcharge posts to its own revenue line, and a description flag. When the code is attached to a document, the calc lives in `sop_l_maint_misc_adjustments` — and it's exactly the arithmetic you'd write by hand:

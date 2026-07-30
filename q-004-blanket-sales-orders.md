@@ -53,19 +53,19 @@ facility: SYS_M_267
 toc: Sales > Pricing > Prices > Sales Prices
 context: Company = 01 | Price Type = Contract
 form:
-  Customer Number {lov} = CUST-4021
-  Product {lov} = FG100
-  Warehouse {lov} = WH01
-  Contract Number = C-100237
-  Description = Annual volume agreement
-  Contract Status = O - Open
-  Valid From = 01-Jan-2026
-  Valid To = 31-Dec-2026
-  Price Unit {lov} = LB
-  Currency {lov} = USD
-  Contract Quantity = 50,000
-  Quantity Ordered to Date {ro} = 12,000
-  Contract Quantity Outstanding {ro} = 38,000
+  Customer Number {lov} = CUST-4021  ! SOP_PRICES.CUSTOMER_NUMBER {TEXT} — Customer the contract price applies to
+  Product {lov} = FG100  ! SOP_PRICES.PART_CODE {TEXT} — Product the price applies to
+  Warehouse {lov} = WH01  ! SOP_PRICES.WAREHOUSE {TEXT} — Warehouse the price applies to
+  Contract Number = C-100237  ! SOP_PRICES.CONTRACT_NUMBER {TEXT} — Code identifying this contract
+  Description = Annual volume agreement  ! SOP_PRICES.DESCRIPTION {TEXT} — Brief free-text description of the contract
+  Contract Status = O - Open  ! SOP_PRICES.SYS_CONTRACT_STATUS_FLAG {TEXT} — Open/closed flag; C closes the contract to sales
+  Valid From = 01-Jan-2026  ! SOP_PRICES.VALID_FROM_DATE {DATE_TIME} — Date the price becomes effective
+  Valid To = 31-Dec-2026  ! SOP_PRICES.VALID_TO_DATE {DATE_TIME} — Date the price expires
+  Price Unit {lov} = LB  ! Unit of measure the price is quoted in
+  Currency {lov} = USD  ! SOP_PRICES.SYS_CURRENCY_CODE {TEXT} — Currency the price is expressed in
+  Contract Quantity = 50,000  ! SOP_PRICES.CONTRACT_QTY {QUADWORD} — Total contracted quantity, in pricing units
+  Quantity Ordered to Date {ro} = 12,000  ! SOP_PRICES.CONTRACT_QTY_ORD_TD {QUADWORD} — Quantity ordered against the contract so far
+  Contract Quantity Outstanding {ro} = 38,000  ! SOP_PRICES.CONTRACT_QTY_OUTSTANDING {QUADWORD} — Computed: contract qty minus ordered-to-date
 grid: Contract Price Breaks
   # Break, Quantity | Price | Price Unit
   0 | 4.250 | LB

@@ -98,13 +98,13 @@ facility: AR_M_001
 toc: Accounts Receivable > Transactions > Amend Batches
 context: Division = 10 | Batch = 2607 | Base = USD
 form:
-  Batch Number {ro} = 2607
-  Description = Monthly service invoices
-  Posting Period = 7
-  Year = 2026
-  Postings by Batch or Transaction = Transaction
-  Batch Transaction Type {lov} = IN — Invoices
-  Batch Control Total = 15,000.00
+  Batch Number {ro} = 2607  ! AR_BATCH_TRANSACTIONS.BATCH_NUMBER {LONGWORD} — Batch identifier, entered or auto-assigned by AR
+  Description = Monthly service invoices  ! AR_BATCH_TRANSACTIONS.BATCH_DESCRIPTION {TEXT} — Free-text description of the batch
+  Posting Period = 7  ! AR_BATCH_TRANSACTIONS.CURRENT_PERIOD {WORD} — Accounting period (0-13) the batch posts to
+  Year = 2026  ! AR_BATCH_TRANSACTIONS.CURRENT_YEAR {WORD} — Fiscal year the batch posts to
+  Postings by Batch or Transaction = Transaction  ! AR_BATCH_TRANSACTIONS.HOW_POST {TEXT} — GL posts by whole batch (B) or per transaction (T)
+  Batch Transaction Type {lov} = IN — Invoices  ! AR_BATCH_TRANSACTIONS.TRANSACTION_TYPE {TEXT} — Transaction type code governing the batch's postings
+  Batch Control Total = 15,000.00  ! AR_BATCH_TRANSACTIONS.BATCH_CONTROL_TOTAL {CURRENCY} — Expected hash total of all postings in the batch
 grid: AR Batch Transaction Lines
   # Bat,Seq | Customer,Number | Transaction,Date | Transaction,Description | Transaction,Value
   1 | CUST-4021 | 28-Jul-2026 | Monthly service — Location 01 | 5,000.00

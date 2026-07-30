@@ -121,16 +121,16 @@ facility: IC_M_046B
 toc: Manufacturing > Master > Reference > Product Warehouse
 context: Product = SCRAP7000 | Description = Scrap — costed = FG100 | Warehouse = WH1
 form:
-  Source Indicator {lov} = Make
-  Costing Factory {lov} = FAC1
-  Costing Process Spec {lov} = SCRAP7000-COST
-  Version Number {lov} = 1
-  Process Spec Description {ro} = Scrap 7000 cost recipe
-  Planning Factory {lov} = FAC1
-  Planning Product {lov} = SCRAP7000
-  Default %Loss = 0.00
-  Cost Category {lov} = 
-  Manufacture Lead Time = 0
+  Source Indicator {lov} = Make  ! PRODUCT_WAREHOUSE.MAKE_BUY {TEXT} — Make, buy, or transfer sourcing for the item
+  Costing Factory {lov} = FAC1  ! PART_MASTER_M.COSTING_FACTORY — Factory whose process spec drives standard costing
+  Costing Process Spec {lov} = SCRAP7000-COST  ! PART_MASTER_M.COSTING_PROCESS_SPEC — Process specification used to cost the product
+  Version Number {lov} = 1  ! PART_MASTER_M.COSTING_PROCESS_SPEC_VERSION — Version of the costing process spec
+  Process Spec Description {ro} = Scrap 7000 cost recipe  ! Description of the selected costing process spec
+  Planning Factory {lov} = FAC1  ! PART_MASTER_M.PLANNING_FACTORY — Factory used to plan production of the item
+  Planning Product {lov} = SCRAP7000  ! PART_MASTER_M.PLANNING_PRODUCT — Product code used for planning
+  Default %Loss = 0.00  ! PART_MASTER_M.DEFAULT_YIELD — Default expected percentage material loss
+  Cost Category {lov} =   ! PART_MASTER_M.COST_CATEGORY {TEXT} — Category for grouping the product's costs
+  Manufacture Lead Time = 0  ! PART_MASTER_M.MANU_LEAD_TIME {LONGWORD} — Days required to manufacture the item
 ```
 
 The three load-bearing fields are **Costing Factory**, **Costing Process Spec**, and **Version Number** — set them to your scrap recipe and the rollup follows that pointer to cost `#scrap7000` as its own principal product. Why it works: when the rollup processes the scrap recipe, its single input is a Make item, so it pulls that input's **rolled standard cost** straight from `PRODUCT_WH_PRELIM_COSTS` —
@@ -159,10 +159,10 @@ facility: PM_M_001
 toc: Manufacturing > Master > Recipe > Create Recipe
 context: Recipe = FG100-PROD | Primary Product = FG100 | Description = Finished Good 100 | Version = 1 (Active)
 form:
-  Recipe Code {ro} = FG100-PROD
-  Version {ro} = 1
-  Primary Product {lov} = FG100
-  Description = Finished Good 100 — production
+  Recipe Code {ro} = FG100-PROD  ! RECIPES.RECIPE_CODE {TEXT} — Unique code identifying the recipe
+  Version {ro} = 1  ! RECIPES.SYS_VERSION_NUMBER {LONGWORD} — Version number of the recipe
+  Primary Product {lov} = FG100  ! Primary product the recipe produces
+  Description = Finished Good 100 — production  ! RECIPES.DESCRIPTION {TEXT} — Descriptive text for the recipe
 grid: Recipe Lines
   # Line | Type | Product /,Resource | Description | Qty | UOM | Cost,Alloc % | Credit,By-product | Final,Product
   ~ Ingredients (Materials)

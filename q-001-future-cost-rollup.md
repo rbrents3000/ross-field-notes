@@ -67,12 +67,12 @@ facility: PM_U_047
 toc: Product Costing > Standard/Future Cost Rollup
 context: Company = 01
 form:
-  All Products = No
-  Warehouse {lov} = WH01
-  Product {lov} = FG100
-  Cost Type {lov} = 02  Preliminary
-  Valid From Date {ro} = 01-Jul-2026
-  Preliminary Cost Update? = No
+  All Products = No  ! Roll up all products, or limit to a selection
+  Warehouse {lov} = WH01  ! Warehouse(s) to include in the rollup
+  Product {lov} = FG100  ! Product/part code(s) to include in the rollup
+  Cost Type {lov} = 02  Preliminary  ! Cost type to roll up (e.g. preliminary)
+  Valid From Date {ro} = 01-Jul-2026  ! Effective-from date of the selected cost type
+  Preliminary Cost Update? = No  ! Whether to store results as preliminary costs
 ```
 
 There's a **Cost Type** field — and nowhere on the screen is there a *Mode* switch. Type `02` and you're in Standard mode; type anything else and you're in Future mode, with no on-screen tell that the choice was made for you. (The one giveaway is subtle: the **Preliminary Cost Update?** row only appears *because* `02` put the run in Standard mode — enter a future cost type and it isn't there.)
