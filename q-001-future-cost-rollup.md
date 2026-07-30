@@ -15,7 +15,7 @@ margin_notes:
   - "02 first, then 20 ↴"
   - "future mode only READS the qty tables →"
   - "let Make items derive, don't hand-key"
-reviewed: "2026-07-24"
+reviewed: "2026-07-29"
 verified: "Verified against Ross 8.0 source"
 applies_when:
   - "The audit report errors with `P_01405` — 'Product … not found in Process Costing Spec' — as an error, not a warning."

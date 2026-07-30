@@ -11,7 +11,7 @@ excerpt: "There's no blanket sales order. The quantity-and-price commitment live
 question: "Purchasing has blanket orders — agree a quantity and a price, then release against it over time. I need the same thing for a customer on the sell side. Is there a blanket sales order, or am I building it myself?"
 restated: "Does Ross have a blanket sales order equivalent to the blanket PO, and if not, which sell-side feature gives a customer a capped quantity at a fixed price drawn down over time?"
 fix: "No 'blanket sales order' exists. The quantity-and-price commitment lives in Sales Contract Pricing, which draws down like a blanket — a pricing agreement applied to ordinary orders, not a separate document. The orders literally named 'Contract' — CONINV and CONSHP — are unrelated: they're the contract-manufacturing / customer-owned-goods flow."
-reviewed: "2026-07-24"
+reviewed: "2026-07-29"
 verified: "Verified against Ross 8.0 source"
 key_refs:
   - "SOP_PRICES"

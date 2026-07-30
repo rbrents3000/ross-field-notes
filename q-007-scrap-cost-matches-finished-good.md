@@ -160,7 +160,7 @@ form:
   Primary Product {lov} = FG100
   Description = Finished Good 100 — production
 grid: Recipe Lines
-  # Line | Type | Product / Resource | Description | Qty | UOM | Cost Alloc % | Credit By-product | Final Product
+  # Line | Type | Product /,Resource | Description | Qty | UOM | Cost,Alloc % | Credit,By-product | Final,Product
   ~ Ingredients (Materials)
   10 | Ingredient | RM-FLOUR | Flour, bakers | 50.000 | LB | | |
   20 | Ingredient | RM-CHEESE | Mozzarella | 30.000 | LB | | |

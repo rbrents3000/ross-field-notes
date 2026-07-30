@@ -12,7 +12,7 @@ excerpt: "Blanket orders ride the standard PO tables, tagged by POP_ORDER_TYPE �
 question: "We want to use blanket / contract purchasing — agree a quantity and a price with a supplier, then release against it over time. Before I build any reports or integrations around it, how does the whole thing actually work in Ross: the tables, the order types, the lifecycle, and the guardrails?"
 restated: "How do blanket (contract) purchase orders work end to end in Ross — the order types, tables, lifecycle, release workflow, and the limits that govern releasing?"
 fix: "Blanket orders don't live in dedicated tables — they ride the standard PO tables (POP_HEADERS / POP_LINES / POP_LINE_DETAILS), distinguished by one field, POP_ORDER_TYPE: N = the master/contract, R = a release against it, P = an ordinary PO. Create the master Inactive, activate it (every line needs GL postings), release against the Active master, then receive and invoice like any PO — and close it when it's spent."
-reviewed: "2026-07-24"
+reviewed: "2026-07-29"
 verified: "Verified against Ross 8.0 source"
 key_refs:
   - "POP_HEADERS"
