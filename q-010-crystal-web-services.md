@@ -38,32 +38,35 @@ Let's retire the phrase "black box" for a second, because it's doing you a disse
 
 So "Crystal Web Services" is a slightly grand name for a modest idea: **a report engine you reach by opening a URL.** No SOAP envelope, no WSDL, no `.asmx` you invoke from DML. Ross builds a web address, hands it to a browser, and a small web application on the Crystal server does the rest. Let's open the glass.
 
-## First, the fork in the road: three print engines, one switch
+## First, the fork in the road: one switch picks the engine
 
-Every printable document in Ross (BOL, invoice, PO, check, COA, packing list, and so on) can be produced by one of three engines, chosen **per report** by a single field on `REPORT_PRINT_CONTROLS`:
+Every printable document in Ross (BOL, invoice, PO, check, COA, packing list, and so on) is produced by whichever engine a single field on `REPORT_PRINT_CONTROLS` names. That field — `SYS_REPORT_PROCESS_TYPE` — has four possible values: one *native* engine that renders inside Ross, and three that print by handing a URL to an off-box web app:
 
 ```cards
 0 | iRen | The classic engine — a native GEMBASE REPORT_FORM renders a character/columnar report right inside Ross. No browser, no external server.
 1 | Crystal | The subject of this note — Ross builds a URL and a Crystal Reports web app renders a .rpt template to PDF off-box.
-2 | RRS | The SQL Server Reporting Services (SSRS) path — same URL idea, different renderer and a couple of extra parameters.
+2 | DC | The Data Collection path — the RF/warehouse label route (LPN and sub-LPN labels). Same web-service handoff as Crystal, but aimed at label stock rather than documents.
+3 | RRS | The SQL Server Reporting Services (SSRS) path — same URL idea, different renderer and a couple of extra parameters.
 ```
 
-> **in plain terms** — the same document can print three different ways, and which way is a configuration choice, not a code change. Flip the report's process type and the *layout* engine changes; the *data* usually doesn't.
+> **in plain terms** — the same document can print more than one way (iRen, Crystal, or RRS — the DC value is for warehouse labels), and which way is a configuration choice, not a code change. Flip the report's process type and the *layout* engine changes; the *data* usually doesn't.
 
-The switch is `SYS_REPORT_PROCESS_TYPE` on `REPORT_PRINT_CONTROLS`. The report driver asks `LB_REPORT_PRINT_CONTROL` which engine is set, then branches — `CRYSTAL_SERVICE`, `IREN_SERVICE`, or the SSRS path:
+The report driver asks `LB_REPORT_PRINT_CONTROL` which value is set, then branches to the matching service block — `CRYSTAL_SERVICE`, `IREN_SERVICE`, `SSRS_SERVICE`, or the DC path. Here's the routing logic, condensed — iRen is the `ELSE`, the fallback when nothing else matches:
 
 ```dml
 @program LB_REPORT_PRINT_CONTROL.DML
 @note THE ROUTER — READS THE REPORT'S PROCESS TYPE AND HANDS BACK WHICH ENGINE
 @reads report_print_controls
 @risk if no control row exists the code defaults to iRen — a Crystal report with a missing control silently prints the old way
-@highlight 1-3
+@highlight 1,8
 IF (REPORT_PRINT_CONTROLS(SYS_REPORT_PROCESS_TYPE) = PARAMETER("CRYSTAL_REPORT"))
-    #R6 = PARAMETER("CRYSTAL_REPORT")
+    #R6 = PARAMETER("CRYSTAL_REPORT")   ! "1"
+ELSE_IF (REPORT_PRINT_CONTROLS(SYS_REPORT_PROCESS_TYPE) = PARAMETER("DC_REPORT"))
+    #R6 = PARAMETER("DC_REPORT")        ! "2" — Data Collection / RF labels
 ELSE_IF (REPORT_PRINT_CONTROLS(SYS_REPORT_PROCESS_TYPE) = PARAMETER("RRS_REPORT"))
-    #R6 = PARAMETER("RRS_REPORT")
+    #R6 = PARAMETER("RRS_REPORT")       ! "3"
 ELSE
-    #R6 = PARAMETER("IREN_REPORT")
+    #R6 = PARAMETER("IREN_REPORT")      ! "0" — the default when nothing matches
 END_IF
 ```
 
@@ -73,7 +76,7 @@ END_IF
 
 When a report resolves to Crystal, Ross runs its `CRYSTAL_SERVICE` block, which does two very different kinds of loading before anyone touches a URL.
 
-**Stage one — the print controls (the *how*).** It clears and reloads `SYS_WS_PRINT_CONTROLS_VT` from that report's `REPORT_PRINT_CONTROLS` row. This is the report's standing configuration — everything that's true every time you print it, regardless of *which* BOL:
+**Stage one — the print controls (the *how*).** As it resolves the engine, `LB_REPORT_PRINT_CONTROL` (through its `FILL_WS_VT` helper) clears and reloads `SYS_WS_PRINT_CONTROLS_VT` from that report's `REPORT_PRINT_CONTROLS` row. This is the report's standing configuration — everything that's true every time you print it, regardless of *which* BOL. (A few values from the same row — the report name, print queue, and copy count — ride along as call parameters rather than in the VT, but they all originate from that one control row.)
 
 | Control field | What it tells the web app |
 | --- | --- |
@@ -140,6 +143,7 @@ What comes out the other end is a single URL whose query string is, in effect, t
 | `sys_report_output_directory` · `sys_report_file_type` · `sys_extension` | control | Where the file lands, and in what format |
 | `email` · `sys_save_report` · `auto_upload_sharepoint` | control | Post-render routing |
 | `sys_run_as_service` · `sys_debug_mode` | control | Unattended / verbose |
+| `sys_ext_report_template` | control | An external report template, when one is configured |
 | `iaf_environment` | SCV `IAF_ENVIRONMENT` | Which environment (so DEV output can't print on PROD) |
 
 > **rule of thumb** — if a Crystal report misbehaves, turn on `SYS_DEBUG_MODE`, print it, and read the URL. Every input the renderer receives is in that string. A blank report is almost always a bad `params=` or a proc that returned nothing; a mis-queued one is a bad `report_queue=`; a "prints in DEV, not PROD" is `iaf_environment=`.
@@ -154,13 +158,15 @@ where: CREATE_URL_FILE
 do: the browser is on the user's PC, not the app server — so Ross can't just "open a URL". It writes the URL into a .bat file on the client, then runs it.
 sys: rsiWriteFile.exe writes the URL line-by-line into the batch file; then CLI/CLIENT "rsiRunCrystal.bat" runs it on the client, which launches the URL in the client's browser.
 
-2 | iBrowser / IAF Desktop (IBROWSER GUI)
+2 | iBrowser (IBROWSER GUI, IAF DESKTOP GUI)
 where: CREATE_URL_ONLY
 do: the session already IS a browser, so there's no need for a detour — build the URL string and open it directly.
 sys: CREATE_URL_ONLY returns the assembled URL in a parameter; the driver calls OPEN_URL to open it in a tab (or a new window when SYS_DEBUG_MODE is on).
 ```
 
 > **in plain terms** — the `.bat`-file business isn't Crystal weirdness; it's a Thin Client reality. The report engine lives at a web address, and only the *client* has a browser that can reach it, so Ross posts a note to the client saying "go open this." iBrowser already has the browser in hand, so it skips the note.
+
+> **caution** — the two forms don't emit *quite* the same query string. The iBrowser build (`CREATE_URL_ONLY`) appends `auto_upload_sharepoint=` and `iaf_environment=` on the tail end; the Thin Client batch build (`CREATE_URL_FILE`) stops at `sys_ext_report_template=` and sends neither. If a Crystal report behaves differently in Thin Client than in iBrowser — SharePoint upload not firing, or environment not honored — that trailing-parameter gap is the first place to look.
 
 ## What actually happens on the far side of the glass
 
@@ -206,7 +212,7 @@ Different renderer, same skeleton: load controls, fill params, weld into a URL, 
 
 ## Where this comes from
 
-- `REPORT_PRINT_CONTROLS` (`fin_tables.gem`) — the per-report configuration table; `SYS_REPORT_PROCESS_TYPE` selects the engine (0 iRen / 1 Crystal / RRS), and it carries `SYS_STORED_PROCEDURE`, `SYS_STORED_PROCEDURE_2`, `REPORT_FILE_NAME`, `SYS_REPORT_OUTPUT_DIRECTORY`, `SYS_REPORT_FILE_TYPE`, the routing flags (`EMAIL`, `SYS_SAVE_REPORT`, `AUTO_UPLOAD_SHAREPOINT`), and the run flags (`SYS_RUN_AS_SERVICE`, `SYS_DEBUG_MODE`, `SPLIT_REPORT_FLAG`).
+- `REPORT_PRINT_CONTROLS` (`fin_tables.gem`) — the per-report configuration table; `SYS_REPORT_PROCESS_TYPE` selects the engine (0 iRen / 1 Crystal / 2 DC / 3 RRS), and it carries `SYS_STORED_PROCEDURE`, `SYS_STORED_PROCEDURE_2`, `REPORT_FILE_NAME`, `SYS_REPORT_OUTPUT_DIRECTORY`, `SYS_REPORT_FILE_TYPE`, the routing flags (`EMAIL`, `SYS_SAVE_REPORT`, `AUTO_UPLOAD_SHAREPOINT`), and the run flags (`SYS_RUN_AS_SERVICE`, `SYS_DEBUG_MODE`, `SPLIT_REPORT_FLAG`).
 - `LB_REPORT_PRINT_CONTROL` (`GET_REPORT_PROCESS_TYPE`) — the router that reads the process type; defaults to iRen when no control row is found.
 - `SOP_R_BOL_PRINT.DML` — a representative driver: `CRYSTAL_SERVICE` loads `SYS_WS_PRINT_CONTROLS_VT`, `CFB_SERVICE` fills `URL_PARAMS_VT` with `KEY=VALUE;` rows, then branches on `%THIN_CLIENT_TYPE` to either write-and-run a `.bat` or `OPEN_URL` directly.
 - `LB_S_L_CRYSTAL_URL_MAKER.DML` — two forms: `CREATE_URL_FILE` (writes the URL into a batch file via `rsiWriteFile.exe`, for Thin Client) and `CREATE_URL_ONLY` (returns the URL string, for iBrowser). Base address from SCV `GEM_CRYSTAL_URL`; the fat-app name from SCV `GEM_CONNECT_APP`; environment from SCV `IAF_ENVIRONMENT`.
