@@ -7,10 +7,10 @@ source: "form"
 date: "2026-08-02"
 system: "Ross ERP 8.0"
 reading_time: "11 min"
-excerpt: "Crystal 'web services' isn't a mystery service Ross talks to over SOAP — it's a print engine you point a browser at. Ross assembles a long query-string URL, hands it to a browser (via a .bat on Thin Client, or directly in iBrowser), and a small web app on the Crystal server reads that URL, calls a Ross stored procedure back through Connect to fetch the data, renders a .rpt template to PDF, and prints/emails/files it. The 'black box' is opaque only until you read the query string — every parameter it needs is spelled out in plain text by LB_S_L_CRYSTAL_URL_MAKER, so the box tells on itself."
+excerpt: "Crystal 'web services' isn't a mystery service Ross talks to over SOAP — it's a print engine you point a browser at. Ross assembles a long query-string URL, hands it to a browser — opened directly in an IAF Desktop / iBrowser session — and a small web app on the Crystal server reads that URL, calls a Ross stored procedure back through Connect to fetch the data, renders a .rpt template to PDF, and prints/emails/files it. The 'black box' is opaque only until you read the query string — every parameter it needs is spelled out in plain text by LB_S_L_CRYSTAL_URL_MAKER, so the box tells on itself."
 question: "Can you explain what 'Crystal Web Services' are in Ross — what they are, how they actually work end to end, and what's going on inside that black box? We treat it as magic that turns a menu pick into a PDF and nobody here can say what the moving parts are."
 restated: "In standard Ross ERP 8.0, what is the Crystal Reports 'web service' print path, and what is the end-to-end mechanism — from a report menu pick to a finished PDF — that turns a document into a Crystal-rendered output?"
-fix: "It's not a SOAP/WSDL service and there's nothing to 'call' — it's a browser-launched print URL. When a report is configured as process type Crystal, Ross loads that report's print controls (stored-procedure name, .rpt file, output type, queue, flags) into SYS_WS_PRINT_CONTROLS_VT, drops the run-time arguments into URL_PARAMS_VT as KEY=VALUE; rows, and then LB_S_L_CRYSTAL_URL_MAKER stitches all of it into one long HTTP query string built on the GEM_CRYSTAL_URL base. On Thin Client/iDesktop it writes that URL into a .bat (rsiWriteFile.exe) and runs rsiRunCrystal.bat so the client browser opens it; in iBrowser it just OPEN_URLs the string. A small print web app on the Crystal/IIS server receives the URL, uses gem_connect_app to open a Ross Connect session as gembase_user, executes the named stored procedure with those params to pull the report data, feeds it to the Crystal runtime rendering the .rpt template, and then routes the result — print to report_queue × report_copies, email, save to the output directory, and/or upload to SharePoint. The box is opaque only until you read the query string: it hands you a fully labelled contract on the way in."
+fix: "It's not a SOAP/WSDL service and there's nothing to 'call' — it's a browser-launched print URL. When a report is configured as process type Crystal, Ross loads that report's print controls (stored-procedure name, .rpt file, output type, queue, flags) into SYS_WS_PRINT_CONTROLS_VT, drops the run-time arguments into URL_PARAMS_VT as KEY=VALUE; rows, and then LB_S_L_CRYSTAL_URL_MAKER stitches all of it into one long HTTP query string built on the GEM_CRYSTAL_URL base. On a current IAF Desktop / iBrowser session it just OPEN_URLs the string; older GTC/PORTAL thin-client sessions instead write the URL into a .bat (rsiWriteFile.exe) and run rsiRunCrystal.bat. A small print web app on the Crystal/IIS server receives the URL, uses gem_connect_app to open a Ross Connect session as gembase_user, executes the named stored procedure with those params to pull the report data, feeds it to the Crystal runtime rendering the .rpt template, and then routes the result — print to report_queue × report_copies, email, save to the output directory, and/or upload to SharePoint. The box is opaque only until you read the query string: it hands you a fully labelled contract on the way in."
 margin_notes:
   - "not SOAP — a browser-launched print URL ↴"
   - "process type lives on REPORT_PRINT_CONTROLS →"
@@ -148,25 +148,25 @@ What comes out the other end is a single URL whose query string is, in effect, t
 
 > **rule of thumb** — if a Crystal report misbehaves, turn on `SYS_DEBUG_MODE`, print it, and read the URL. Every input the renderer receives is in that string. A blank report is almost always a bad `params=` or a proc that returned nothing; a mis-queued one is a bad `report_queue=`; a "prints in DEV, not PROD" is `iaf_environment=`.
 
-## Handing it to a browser — two ways
+## Handing it to a browser
 
-The URL maker has two forms, and which one runs depends on how the user is connected (`%THIN_CLIENT_TYPE`). This is the only genuinely fiddly part, and it exists purely because of *where the browser lives*:
+The URL maker has two forms, and which one runs depends on how the user is connected (`%THIN_CLIENT_TYPE`). On any current deployment it's the first one — the second is a legacy thin-client path most sites never hit:
 
 ```steps
-1 | Thin Client / iDesktop (GTC, PORTAL)
-where: CREATE_URL_FILE
-do: the browser is on the user's PC, not the app server — so Ross can't just "open a URL". It writes the URL into a .bat file on the client, then runs it.
-sys: rsiWriteFile.exe writes the URL line-by-line into the batch file; then CLI/CLIENT "rsiRunCrystal.bat" runs it on the client, which launches the URL in the client's browser.
-
-2 | iBrowser (IBROWSER GUI, IAF DESKTOP GUI)
+1 | IAF Desktop / iBrowser (IAF DESKTOP GUI, IBROWSER GUI)
 where: CREATE_URL_ONLY
-do: the session already IS a browser, so there's no need for a detour — build the URL string and open it directly.
-sys: CREATE_URL_ONLY returns the assembled URL in a parameter; the driver calls OPEN_URL to open it in a tab (or a new window when SYS_DEBUG_MODE is on).
+do: the session already IS a browser, so there's no detour — build the whole URL string and open it directly.
+sys: CREATE_URL_ONLY returns the assembled URL in a parameter; the driver calls OPEN_URL to open it in a tab (or a new window when SYS_DEBUG_MODE is on). This is the path virtually every current session takes.
+
+2 | Legacy thin client (GTC, PORTAL)
+where: CREATE_URL_FILE
+do: these old thin-client sessions can't open a URL themselves, so Ross writes the URL into a .bat on the client and runs it.
+sys: rsiWriteFile.exe writes the URL line-by-line into the batch file; then CLI/CLIENT "rsiRunCrystal.bat" runs it on the client. Modern IAF Desktop deployments never reach this form.
 ```
 
-> **in plain terms** — the `.bat`-file business isn't Crystal weirdness; it's a Thin Client reality. The report engine lives at a web address, and only the *client* has a browser that can reach it, so Ross posts a note to the client saying "go open this." iBrowser already has the browser in hand, so it skips the note.
+> **in plain terms** — on IAF Desktop the session opens the URL directly; there's nothing exotic to it. The `.bat`-file detour exists only for the old GTC/PORTAL thin client, whose browser lives on the user's PC rather than in the session — so Ross posts a note to the client saying "go open this." For practical purposes it's deprecated.
 
-> **caution** — the two forms don't emit *quite* the same query string. The iBrowser build (`CREATE_URL_ONLY`) appends `auto_upload_sharepoint=` and `iaf_environment=` on the tail end; the Thin Client batch build (`CREATE_URL_FILE`) stops at `sys_ext_report_template=` and sends neither. If a Crystal report behaves differently in Thin Client than in iBrowser — SharePoint upload not firing, or environment not honored — that trailing-parameter gap is the first place to look.
+> **caution** — the two forms don't emit *quite* the same query string. The direct build (`CREATE_URL_ONLY`) appends `auto_upload_sharepoint=` and `iaf_environment=` on the tail; the legacy batch build (`CREATE_URL_FILE`) stops at `sys_ext_report_template=` and sends neither. It's rarely relevant now, but if a report ever behaved differently from a GTC/PORTAL session — SharePoint upload not firing, or environment not honored — that trailing-parameter gap is why.
 
 ## What actually happens on the far side of the glass
 
@@ -192,6 +192,22 @@ sys: an optional sys_stored_procedure_2 runs afterward — commonly the "mark th
 
 That's the entire trick. **Ross gathers the data and describes the job; Crystal draws the picture and delivers it.** The division of labour is the point — and it's a genuinely good design once you stop expecting a service call and start seeing a print handoff.
 
+## When it won't print — where to look first
+
+The URL maker fails loudly, with specific message codes. Match the code — or the symptom — back to the knob that caused it:
+
+| Symptom | What's happening | First thing to check |
+| --- | --- | --- |
+| `P_13293` · nothing prints | The base URL came back empty; the maker exits before building anything. | SCV `GEM_CRYSTAL_URL`. |
+| `P_91053` · "failed to start stream" | A staging table was empty when the maker ran. | The caller must fill both tables (`FILL_WS_VT` + the `URL_PARAMS_VT` rows) *before* calling the maker. |
+| `P_13282` · "error creating the URL" | A wrapper error — the maker returned failure. A symptom, not the cause. | The specific code raised just before it (`P_13293` / `P_91053`). |
+| `P_13283` · environment unsupported | The session type can't open a print URL. | You're not on `IAF DESKTOP GUI` / `IBROWSER GUI` / `GTC` / `PORTAL` — e.g. a background run. |
+| Set to Crystal, prints native anyway | Blank `SYS_REPORT_PROCESS_TYPE`, or a non-web session, forces the fallback to iRen. | The resolved process type, and that you're on a web-capable session. |
+| A separate window opens each print | `SYS_DEBUG_MODE` is on — debug opens a new window instead of a tab. | Turn off `SYS_DEBUG_MODE` on the report's controls. |
+| Renders, but can't read Ross data | The web app's call home through Connect failed. | SCV `GEM_CONNECT_APP`. |
+
+Codes `P_13291` / `P_13292` / `P_13294` are legacy-thin-client-only (the `.bat` helpers) — a modern IAF Desktop session never sees them.
+
 ## Why anyone built it this way
 
 Two payoffs justify the extra moving parts, and they're worth stating because they explain the whole architecture:
@@ -205,7 +221,7 @@ Two payoffs justify the extra moving parts, and they're worth stating because th
 
 You'll see two cousins of the Crystal URL maker in the same module, and they follow the identical pattern so they're easy to reason about once you have Crystal down:
 
-- **`LB_S_L_RRS_URL_MAKER`** — the SSRS path. Same query-string idea, but it adds a `document_list_name` and a `SYS_POST_UPDATE_SCRIPT`, and it targets the Reporting Services server URL instead of `GEM_CRYSTAL_URL`.
+- **`LB_S_L_RRS_URL_MAKER`** — the SSRS path, and the newest of the four engines (a later addition to the 8.0 line, where the Crystal path is original-vintage code). Same skeleton, but don't assume it's interchangeable: its base URL is passed in as a call parameter (not `GEM_CRYSTAL_URL`); it has a single form plus a `SUMMARY_PAGE_URL` wrapper; it sends `params=` **empty** (it never streams the `URL_PARAMS` tables); and it sources its main procedure from `SYS_GET_DOCUMENT_LIST` (plus a `document_list_name`) rather than `SYS_STORED_PROCEDURE`.
 - **`LB_WSS_URL_MAKER`** — the same URL-assembly convention applied to the web self-service/SharePoint side.
 
 Different renderer, same skeleton: load controls, fill params, weld into a URL, hand it to a browser.
@@ -215,7 +231,7 @@ Different renderer, same skeleton: load controls, fill params, weld into a URL, 
 - `REPORT_PRINT_CONTROLS` (`fin_tables.gem`) — the per-report configuration table; `SYS_REPORT_PROCESS_TYPE` selects the engine (0 iRen / 1 Crystal / 2 DC / 3 RRS), and it carries `SYS_STORED_PROCEDURE`, `SYS_STORED_PROCEDURE_2`, `REPORT_FILE_NAME`, `SYS_REPORT_OUTPUT_DIRECTORY`, `SYS_REPORT_FILE_TYPE`, the routing flags (`EMAIL`, `SYS_SAVE_REPORT`, `AUTO_UPLOAD_SHAREPOINT`), and the run flags (`SYS_RUN_AS_SERVICE`, `SYS_DEBUG_MODE`, `SPLIT_REPORT_FLAG`).
 - `LB_REPORT_PRINT_CONTROL` (`GET_REPORT_PROCESS_TYPE`) — the router that reads the process type; defaults to iRen when no control row is found.
 - `SOP_R_BOL_PRINT.DML` — a representative driver: `CRYSTAL_SERVICE` loads `SYS_WS_PRINT_CONTROLS_VT`, `CFB_SERVICE` fills `URL_PARAMS_VT` with `KEY=VALUE;` rows, then branches on `%THIN_CLIENT_TYPE` to either write-and-run a `.bat` or `OPEN_URL` directly.
-- `LB_S_L_CRYSTAL_URL_MAKER.DML` — two forms: `CREATE_URL_FILE` (writes the URL into a batch file via `rsiWriteFile.exe`, for Thin Client) and `CREATE_URL_ONLY` (returns the URL string, for iBrowser). Base address from SCV `GEM_CRYSTAL_URL`; the fat-app name from SCV `GEM_CONNECT_APP`; environment from SCV `IAF_ENVIRONMENT`.
+- `LB_S_L_CRYSTAL_URL_MAKER.DML` — two forms: `CREATE_URL_ONLY` (returns the URL string, for IAF Desktop / iBrowser — the current path) and `CREATE_URL_FILE` (writes the URL into a batch file via `rsiWriteFile.exe`, for the legacy GTC/PORTAL thin client). Base address from SCV `GEM_CRYSTAL_URL`; the fat-app name from SCV `GEM_CONNECT_APP`; environment from SCV `IAF_ENVIRONMENT`.
 - `LB_S_L_RRS_URL_MAKER.DML` / `LB_WSS_URL_MAKER.DML` — the SSRS and web-self-service siblings, same assembly pattern.
 
 The usual honest caveat: this is standard Ross 8.0 behaviour read from source, and the mechanism is stable, but two of the three parts — the `.rpt` templates and the print web application itself — live outside GEMBASE on the Crystal/IIS server, so their configuration (paths, Connect app, service account, environment) is site-specific and not visible from the DML. The stable landmarks are the `SYS_REPORT_PROCESS_TYPE` switch, the `SYS_WS_PRINT_CONTROLS_VT` + `URL_PARAMS_VT` pair, and the `GEM_CRYSTAL_URL` / `GEM_CONNECT_APP` config values. Your queues, output directories, and template names are yours — confirm them on your own system before quoting a path.
