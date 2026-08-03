@@ -23,6 +23,8 @@ applies_when:
   - "You're integrating an external system — a WMS, an APS/planning engine, CRM, a 3PL, a label printer — with Ross and someone said 'call the Ross web service.'"
   - "You see procedures named RS_* (RS_GET_..., RS_WMS_..., RS_SCM_..., RS_TW_...) and want to know what they are and how they're invoked."
   - "A call 'succeeds' but you get no data back, or an error, and you're not sure where the status actually lives."
+related:
+  - "q-010-crystal-web-services"
 key_refs:
   - "XMLPACK"
   - "RS_SYS_MESSAGES"
@@ -218,10 +220,6 @@ note: the call itself will report success even on a business failure. Always loo
 ```
 
 > **rule of thumb** — if you can call one Ross web service you can call them all. Pick the operation, shape the input VT as XML, send, then read `#ERROR_OCCURRED` + `RS_SYS_MESSAGES`. The only thing that changes service to service is which virtual tables appear in the request and the reply.
-
-## A note on the older RSI interface
-
-You'll sometimes hear "RSI" (the Ross System Interface) in the same breath. That's the earlier, function-style integration layer that predates the XML web services, and some sites still carry `rsi_*` programs for specific hooks (data-collection actions, for instance). For new work in 8.0, the `rs_*` XML web services described here are the standard surface — vanilla, documented per-operation in each wrapper's header, and reusing the application's own server logic. Keep the two names straight, but reach for the `rs_*` services.
 
 ## Where this comes from
 
