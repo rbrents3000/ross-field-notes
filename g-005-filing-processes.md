@@ -93,6 +93,10 @@ already filed. Moving it out of the drop folder *is* the watermark.
 physically reaches the Loop module. An exceptions arm that stopped at the Move would halt the run at
 the first unresolvable file and still report success.
 
+**The exception email needs a recipient module ahead of it.** An Email Out gathers its addressees from
+recipient modules earlier in the flow; with none it sends nothing at all — which would leave the
+exception queue silent in exactly the case it exists to report.
+
 ## Process 3 — catalog sync
 
 Direction A. Enumerates the container, drops anything the other direction wrote *before* the loop
