@@ -26,7 +26,7 @@ related:
   - "g-005-filing-processes"
 key_refs:
   - "Blob index tags"
-  - "Conditional Halt"
+  - "Provenance stamp"
   - "List View Threshold"
 reviewed: "2026-09-08"
 verified: "Verified against Ross 8.0 source and IAF 9.3 documentation"
