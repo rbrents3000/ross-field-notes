@@ -25,7 +25,7 @@ related:
   - "g-003-lift-and-shift-documents"
   - "g-004-two-directions"
 key_refs:
-  - "Conditional Halt"
+  - "Datasection Toolbox"
   - "Data Store"
   - "File In"
 reviewed: "2026-09-08"
@@ -65,8 +65,9 @@ process naturally idempotent and means a transient failure simply leaves the fil
 ## Process 3 — catalog sync
 
 Direction A. Enumerates the container, skips anything the other direction wrote, and creates an item
-carrying the keys plus a link. A Conditional Halt immediately inside the loop is the guard that drops
-anything tagged as having come from the other side — that single module is what stops the echo.
+carrying the keys plus a link. The guard sits *before* the loop: the parsed list is filtered so the loop only ever
+iterates over objects that need syncing. Skipping work item-by-item inside a loop is done with a
+condition on the link, not by halting and resuming.
 
 ## Process 4 — reverse sync
 
@@ -98,6 +99,9 @@ years, and a coverage hole opens the day a new user first runs a report.
   Reverse the order and you get a catalog row pointing at nothing, which nothing can fix.
 - **Alert on silence, not only on errors.** A scheduled process that quietly stops firing produces no
   errors at all.
+- **Put the guard before the loop.** Filter the set before iterating rather than skipping items
+  inside it. Where a decision genuinely has to be per item, put a condition on the link — testing a
+  loop field against a value — rather than halting mid-iteration.
 - **Paging is not optional.** Loop the continuation marker until it comes back empty, or you will
   quietly process only the first page and believe you are current.
 - **Give a poison file somewhere to go** after a third failed attempt, or it is retried forever.
