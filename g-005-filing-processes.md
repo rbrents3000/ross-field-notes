@@ -18,9 +18,9 @@ stats:
   - k: "Untried step"
     v: "1"
     note: "a binary request body"
-  - k: "Access needed"
-    v: "None"
-    note: "to build and hand over"
+  - k: "Load-bearing"
+    v: "Validation"
+    note: "before anything is stored"
 related:
   - "g-003-lift-and-shift-documents"
   - "g-004-two-directions"
@@ -104,24 +104,20 @@ years, and a coverage hole opens the day a new user first runs a report.
 - **Deletion is unhandled by design** — reconciliation surfaces it as an orphan rather than a sync
   silently deleting a record.
 
-## What building it would involve
+## Sequencing the build
 
-These designs need no access to the environment. The processes are configuration: they can be built
-elsewhere, handed over, and imported.
+The five are not equally ready. Three depend on nothing that is still open; two cannot responsibly be
+built until the store question in the design guide is answered. That ordering matters more than any
+estimate.
 
-Sequenced so nothing is built on a guess. **Step 1**, you run the tests. **Step 2** builds processes
-1, 2 and 5, none of which depend on the answers. **Step 3** builds the sync pair, whose shape step 1
-decides.
+**Step 1** settles the questions. **Step 2** builds processes 1, 2 and 5, none of which depend on the
+answers. **Step 3** builds the sync pair, whose shape step 1 decides. Steps 2 and 3 are separable, so
+the work can stop after either without leaving something half-built.
 
-Handed over: the process configurations, the SQL (key validation, the catalog schema and its indexes,
-the three reconciliation comparisons), the store setup (columns, content types, indexed fields,
-default views), and a runbook covering what to configure, what to test after import, and what to
-alert on.
+Beyond the processes themselves, a build produces the SQL — key validation, the catalog schema and
+its indexes, the three reconciliation comparisons — the store setup (columns, content types, indexed
+fields, default views), and a runbook covering what to configure, what to test, and what to alert on.
 
-Your side: import and point — endpoints, credentials and environment identifiers never leave you. Run
-it in non-production first against known transactions. Then own it; the runbook exists so the person
-who inherits this in two years can read it rather than reverse-engineer it.
-
-The honest limits — field names, endpoints and credentials need adapting, which is configuration
-rather than redesign but real work all the same. Nothing can be validated against actual data until
-it runs there. And two of the five cannot responsibly be built until step 1 answers what it answers.
+Field names, endpoints, credentials and environment identifiers are per-deployment and always need
+setting locally. That is configuration rather than redesign, but it is real work. And nothing can be
+validated against real data until it runs against real data.
