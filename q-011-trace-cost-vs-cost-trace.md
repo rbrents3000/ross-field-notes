@@ -236,7 +236,7 @@ Alongside them, **Job Exception Inquiry** (`PM_I_034`) compares actual inputs an
 
 ## So, to answer the question as asked
 
-Nobody should expect Cost Trace to come good on 8.0 through support sessions. It's an add-in whose Ross-side surface is four lines of launcher code, whose published support ceiling is 8.0.0, and which has no post-introduction defect history to suggest anyone is still working on it. The sessions aren't failing because the problem is hard; they're failing because there's almost nothing on the Ross side to change.
+Nobody should expect Cost Trace to come good on 8.0 through support sessions. It's an add-in whose entire Ross-side surface is a single `PERFORM`, whose published support ceiling is 8.0.0, and which has no post-introduction defect history to suggest anyone is still working on it. The sessions aren't failing because the problem is hard; they're failing because there's almost nothing on the Ross side to change.
 
 ```steps
 1 | Settle which feature you have
